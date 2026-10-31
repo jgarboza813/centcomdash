@@ -105,9 +105,9 @@ contradictory sample text or numbers in the image.
 - All score cells, Completed card/ring and Today's Progress text/ring MUST use the confirmed
   [shared score colors](score-colors.md). Use its exact intervals and legend, replacing the
   outdated screenshot. 80% is yellow, 85% green, 95% bright green, and 0 uses No data styling.
-- Missing/null and actual zero share neutral styling but retain distinct numeric/state labels.
-  Calendar historical eligibility (finalized/open/provisional) and future-date treatment remain
-  separate pending decisions; they do not block implementing the shared color classifier.
+- Missing/null and actual zero share neutral styling but retain distinct stored values. Calendar
+  cells labeled No data expose no numeric score in visible text, tooltips, or accessible names.
+  Calendar score eligibility requires date <= today in America/New_York, finalized status, and score >0. Otherwise show “No data” with neutral styling and no numeric calendar score. Finalized today is eligible immediately; reopening hides the score until refinalization. Daily Completed/Progress retain live scores regardless of finalization.
 - Use readable accessible date/score/state labels and keyboard-operable date buttons; color
   alone cannot convey scoring. Loading/failure is visible with Retry, never fabricated no-data.
 

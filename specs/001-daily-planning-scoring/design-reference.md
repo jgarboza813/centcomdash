@@ -26,8 +26,7 @@ The image establishes composition and styling, while confirmed product rules est
 Jose clarified that the review concerns shared score colors, not score calculation. Use
 [score-colors.md](contracts/score-colors.md) across Calendar, Completed and Today's Progress:
 >=95 bright green; >=85–<95 green; >=65–<85 yellow; >=45–<65 orange; >0–<45 red; 0 No data.
-The screenshot legend is outdated. Above-100 scores are bright green. Calendar eligibility
-and future-date presentation remain separate lifecycle questions; thresholds are resolved.
+The screenshot legend is outdated. Above-100 scores are bright green. Calendar score eligibility requires date <= today in America/New_York, finalized status, and score >0. Otherwise show “No data” with neutral styling and no numeric calendar score. Finalized today is eligible immediately; reopening hides the score until refinalization. Daily Completed/Progress retain live scores regardless of finalization.
 
 ## Earlier discrepancies still relevant
 
@@ -70,6 +69,6 @@ Use the specification's consistent nine-task 96-point example for acceptance val
 
 Reserved panels and disabled actions are explicitly labeled Coming later in this slice.
 The embedded score calendar is functional planned scope, not a Coming later placeholder, but
-its colors follow the confirmed shared mapping; lifecycle eligibility remains to clarify.
+its colors follow the confirmed shared mapping; lifecycle eligibility is now confirmed in the specification.
 These follow-ups are not bundled into the current implementation and do not authorize advanced
 analytics or AI work outside the constitution's MVP boundaries.

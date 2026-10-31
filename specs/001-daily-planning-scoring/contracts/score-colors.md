@@ -18,7 +18,8 @@ uncapped and bright green. Classify the actual numeric score before display roun
 Missing records and null/“No plan” scores also use neutral no-data styling, but remain distinct
 underlying states: do not convert missing/null to numerical zero or erase a genuine saved 0%.
 A nonempty zero-score day still shows 0% in score summaries; its calendar uses the neutral
-No data legend class and an accessible label retaining its zero score and lifecycle state.
+No data legend class without showing a numeric score, including in accessible labels. The saved
+zero remains available in the daily detail rather than being erased.
 
 ## Application-wide use
 
@@ -51,5 +52,4 @@ outline and today indicator remain distinct from the score band.
 Test fractional values just below 45, 65, 85 and 95 too; rounding must not move a score into
 a different band. Verify identical classifications across Calendar, Completed and Progress.
 
-Calendar historical eligibility (finalized versus provisional/open days) and future-date
-presentation are separate lifecycle questions, not changes to these confirmed thresholds.
+Calendar score eligibility requires date <= today in America/New_York, finalized status, and score >0. Otherwise show “No data” with neutral styling and no numeric calendar score. Finalized today is eligible immediately; reopening hides the score until refinalization. Daily Completed/Progress retain live scores regardless of finalization.

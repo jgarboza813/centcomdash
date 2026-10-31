@@ -1,6 +1,6 @@
 # Research: Daily Planning and Scoring
 
-**Date**: 2026-10-31 | **Status**: Core technical decisions resolved; shared score colors confirmed; calendar eligibility remains open
+**Date**: 2026-10-31 | **Status**: Core technical decisions resolved; shared score colors confirmed; calendar eligibility confirmed
 
 ## 1. Interface and project shape
 
@@ -104,7 +104,7 @@ month/date controls and CSS grid without a chart package.
 **Alternatives considered**: Treating the calendar as a disabled placeholder would omit the new
 request; copying its sample thresholds would preempt Jose's requested scoring-rule review.
 **Updated decision**: shared colors, above-100 and neutral zero styling are confirmed in
-contracts/score-colors.md. Only calendar lifecycle eligibility/future-date presentation remain open.
+contracts/score-colors.md. Calendar score eligibility requires date <= today in America/New_York, finalized status, and score >0. Otherwise show “No data” with neutral styling and no numeric calendar score. Finalized today is eligible immediately; reopening hides the score until refinalization. Daily Completed/Progress retain live scores regardless of finalization.
 Earlier “technical decisions resolved” statements apply to the original daily slice, not this
 new classification addition. No current scoring formula is changed by this visual revision.
 

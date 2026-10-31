@@ -66,13 +66,12 @@ Gate assessment before research and after design:
 | --- | --- | --- |
 | I. Specify before coding | Pass: spec and decisions recorded | Pass: design only; tasks/analysis precede implementation |
 | II. Commitment model | Pass: fixed weights and score confirmed | Pass: shared pure calculations and contract examples 96/80/120 |
-| III. MVP scope | Pass: bounded daily slice | Pass: manual input, date review; Things and aggregates deferred; embedded calendar added pending rules |
+| III. MVP scope | Pass: bounded daily slice | Pass: manual input, date review; Things and aggregates deferred; embedded calendar with confirmed eligibility/colors |
 | IV. Historical accuracy | Pass: explicit finalize/reopen | Pass: transactions, preserved weights/rules, revisions, retry receipts |
 | V. Simplicity and verification | Pass: no existing code to preserve | Pass: one package, one local process/database; focused tests |
 | VI. Daily usability | Pass: observable UI criteria in spec | Pass: native controls, status text, keyboard and viewport validation |
 
-No constitutional violations identified. Shared score colors are confirmed in contracts/score-colors.md. Calendar historical
-eligibility and future-date presentation still need clarification before dependent work. Runtime upgrade is a concrete
+No constitutional violations identified. Shared score colors are confirmed in contracts/score-colors.md. Calendar score eligibility requires date <= today in America/New_York, finalized status, and score >0. Otherwise show “No data” with neutral styling and no numeric calendar score. Finalized today is eligible immediately; reopening hides the score until refinalization. Daily Completed/Progress retain live scores regardless of finalization. Runtime upgrade is a concrete
 setup prerequisite, not an unresolved product requirement. Synchronization tests apply when
 the Things integration feature is specified; this slice tests saves and transitions.
 
@@ -148,7 +147,7 @@ external state store, container, or cloud service is necessary for this feature.
   rejection, reopening and refinalization, empty/incomplete finalization, midnight stability.
 - FR-014–016: real browser task flow and rendered inspection at both viewport widths;
   keyboard-only controls/focus, status announcements, and distinct empty/loading/error states.
-- FR-017–020: reference composition at desktop/mobile widths, table view/Edit Plan/Done,
+- FR-017–021: reference composition at desktop/mobile widths, table view/Edit Plan/Done,
   add form and direct status toggles, disabled future actions, fixed-budget ring/card values,
   commitment-based guide copy, and discoverable lifecycle actions in the day menu.
 - SC-008: rendered comparison with the supplied image and design-reference.md; record intentional
@@ -161,7 +160,7 @@ external state store, container, or cloud service is necessary for this feature.
 No violations requiring exceptions. The service/store boundary exists to enforce transactional
 lifecycle rules and test disk failures without coupling them to UI rendering.
 
-## Latest-reference calendar addition and gate
+## Latest-reference calendar design
 
 Implement a small MonthlyScoreCalendar.tsx in the lower-left split region; sidebar Calendar
 focuses it. Derive monthly records via GET /api/months/:month from existing saved day values,
@@ -170,5 +169,14 @@ The new Insights panel is a labeled future slot, with no analysis/chart dependen
 
 Use a shared pure classifier in src/domain/score-colors.ts and semantic CSS tokens for all
 score displays. Follow contracts/score-colors.md, not screenshot thresholds. Existing calculation
-is unchanged. Resolve calendar historical eligibility/future-date presentation separately before
-dependent calendar work; color-function and ring integration can proceed independently.
+is unchanged. Calendar score eligibility requires date <= today in America/New_York, finalized status, and score >0. Otherwise show “No data” with neutral styling and no numeric calendar score. Finalized today is eligible immediately; reopening hides the score until refinalization. Daily Completed/Progress retain live scores regardless of finalization.
+
+## Readiness review follow-up
+
+The calendar ambiguity is resolved: eligibility is finalized, positive score, date no later
+than today in America/New_York. Today is eligible immediately after successful finalization;
+reopening removes calendar score/shading until refinalization. Missing/null/zero/unfinalized/
+future cells show No data, while live daily summaries still show the current calculated score.
+Calendar acceptance scenarios are in spec.md. Task order places shared classification before
+consumers and final visual/accessibility review after calendar integration. All implementation
+and verification task boxes remain unchecked.

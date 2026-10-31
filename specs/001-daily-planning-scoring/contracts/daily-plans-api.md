@@ -63,7 +63,13 @@ month plus days containing date, status and scorePercent, using the existing sco
 Missing days are absent; empty plans retain null scores. Read only: it must not create records
 or change lifecycle. Keep the same local-access, no-store and structured error policies.
 
-Before implementing this endpoint, finalize historical eligibility/provisional representation and future-date presentation.
+Calendar score eligibility requires date <= today in America/New_York, finalized status, and score >0. Otherwise show “No data” with neutral styling and no numeric calendar score. Finalized today is eligible immediately; reopening hides the score until refinalization. Daily Completed/Progress retain live scores regardless of finalization.
+The month projection retains raw saved scores/status; the UI applies eligibility without erasing data.
 Classification examples are now confirmed in score-colors.md and must not be reinterpreted. Keep raw dates,
 state and numeric/null scores distinguishable; client colors follow score-colors.md; never invent records. A read
 failure displays calendar Load failed/Retry rather than painting the month as No data.
+
+Calendar eligibility is a presentation filter, not a storage mutation: the monthly projection
+may retain raw saved scores/status, but the calendar must not expose ineligible numeric scores
+in cells, tooltips or accessible names. A finalized positive score for today is eligible;
+unfinalized, future, missing/null and zero results are displayed as No data.

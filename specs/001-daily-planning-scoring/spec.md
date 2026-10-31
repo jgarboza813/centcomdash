@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-31
 
-**Status**: Design updated — shared score colors confirmed; calendar lifecycle eligibility still to clarify
+**Status**: Ready for implementation-readiness recheck
 
 **Input**: User-approved scope: add tasks to a day, assign XL/L/M/S weights, show planned
 allocation and remaining capacity, mark tasks complete, calculate the daily score, and save
@@ -180,6 +180,23 @@ and documented substitutions without requiring future feature data.
    horizontal page scrolling. History can select a saved date; deferred destinations are
    visibly unavailable rather than navigating to empty pages.
 
+### Calendar acceptance scenarios
+
+1. **Given** a finalized day dated today with score 85%, **When** the calendar loads,
+   **Then** its score is visible with green shading immediately.
+2. **Given** a finalized past day with score 96%, **When** I view its month, **Then** its
+   score is visible with bright green shading and selecting it opens the saved daily view.
+3. **Given** an unfinalized day with a positive score, a zero-score finalized day, an empty
+   or missing record, or a future date, **When** I view the calendar, **Then** it shows
+   “No data” with neutral styling and no numeric score. Stored values are not erased.
+4. **Given** an eligible day, **When** I reopen it, **Then** its calendar score/shading is
+   hidden; after successful refinalization the refreshed score/color returns.
+5. **Given** a displayed month, **When** I use previous/next month across a year boundary,
+   **Then** the Sunday-first grid and saved scores match that month, selected-date indication
+   remains distinct, and failed reads offer Retry without pretending data is absent.
+6. **Given** today's editable day, **When** I complete tasks, **Then** Completed and Today's
+   Progress show live score/colors while its calendar cell remains No data until finalized.
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
@@ -248,8 +265,9 @@ and documented substitutions without requiring future feature data.
 - **FR-020**: The dashboard MUST include the embedded monthly historical-score calendar from
   the latest reference, with month navigation, score-color legend, keyboard-accessible saved-day
   selection and a selected-date outline. It MUST use actual saved results and distinguish
-  missing/no-plan records from genuine zero scores despite shared neutral styling. Historical eligibility,
-  provisional states and future-date presentation remain separate lifecycle clarifications.
+  missing/no-plan records from genuine zero scores despite shared neutral styling. Calendar scores MUST be shown only for finalized days dated today or earlier with a
+  positive score. Future dates, unfinalized days, zero and undefined scores MUST show “No data”
+  without numeric calendar scores. Reopening MUST hide the score until refinalization.
   Classification MUST use the confirmed shared mapping; above-100 scores are bright green.
   Existing FR-008 remains unchanged.
 
@@ -292,11 +310,9 @@ and documented substitutions without requiring future feature data.
   interactions, disabled future features and scoring substitutions in User Story 4 against
   the image and design-reference.md, with no fabricated supporting data.
 
-### Remaining calendar lifecycle clarification
+### Confirmed calendar eligibility
 
-Score calculation is unchanged and application-wide color intervals are confirmed. Calendar
-historical eligibility (finalized versus open/provisional days) and future-date presentation
-remain to clarify independently. Do not treat the approved colors as pending scoring rules.
+Calendar score eligibility requires date <= today in America/New_York, finalized status, and score >0. Otherwise show “No data” with neutral styling and no numeric calendar score. Finalized today is eligible immediately; reopening hides the score until refinalization. Daily Completed/Progress retain live scores regardless of finalization.
 
 ## Assumptions
 

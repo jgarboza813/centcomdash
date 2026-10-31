@@ -111,6 +111,11 @@ aligned Sunday-first month, month/year rollover, selected-date outline, keyboard
 sidebar focus and draft-safe day opening. Load failure must offer Retry without invented gray
 or zero-score data. Reopen/refinalize must refresh the displayed saved result. Confirm legend
 labels match the approved intervals and accessible date labels communicate score/state without
-color. Classification examples are confirmed; calendar eligibility/future-date checks await separate
-clarification. Verify 0 neutral, 44 red, 45 orange, 64 orange, 65 yellow, 84 yellow, 85 green,
+color. Classification examples are confirmed; Calendar score eligibility requires date <= today in America/New_York, finalized status, and score >0. Otherwise show “No data” with neutral styling and no numeric calendar score. Finalized today is eligible immediately; reopening hides the score until refinalization. Daily Completed/Progress retain live scores regardless of finalization. Verify 0 neutral, 44 red, 45 orange, 64 orange, 65 yellow, 84 yellow, 85 green,
 94 green, and 95/100/120 bright green; 80% must be yellow on every score display.
+
+Final calendar review: finalize today at 85% and verify immediate green score visibility;
+reopen and verify No data without a score even in tooltips/accessible names; refinalize and
+verify return of score/color. Past finalized 96% is bright green; unfinalized positive, future,
+zero and missing/empty cells stay neutral No data. Daily Completed/Progress remain live.
+Perform final rendered/accessibility review only after the calendar is integrated.

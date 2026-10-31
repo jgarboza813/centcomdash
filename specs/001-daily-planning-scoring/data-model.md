@@ -102,8 +102,7 @@ Read existing DailyPlan/DailyResult rows by calendar month; do not persist a dup
 score. Expose date, lifecycle state and scorePercent (nullable for No plan) for each saved day.
 Missing rows remain absent, not implicit zero. The client builds the Sunday-first month grid.
 Classification uses contracts/score-colors.md; derive color without storing it. Zero and null
-share neutral styling but retain distinct values. Provisional/open eligibility and future-date
-behavior remain separate clarifications.
+share neutral styling but retain distinct values. Calendar score eligibility requires date <= today in America/New_York, finalized status, and score >0. Otherwise show “No data” with neutral styling and no numeric calendar score. Finalized today is eligible immediately; reopening hides the score until refinalization. Daily Completed/Progress retain live scores regardless of finalization.
 Selected calendar month and keyboard focus are client presentation state; date selection reuses
 existing draft-safe navigation. Reopening/refinalizing a day must refresh its month projection.
 

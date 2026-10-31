@@ -1,3 +1,4 @@
+import { SyncWithThings } from "./components/SyncWithThings";
 import { useState } from "react";
 import { useDailyPlan } from "./hooks/useDailyPlan";
 import { result } from "../domain/scoring";
@@ -46,6 +47,7 @@ export default function App() {
   const historic = date !== today(),
     prefix = historic ? "Day’s" : "Today’s";
   const blocked =
+    e.syncState.running ||
     e.loading ||
     !!e.loadError ||
     e.plan.status === "finalized" ||
@@ -117,9 +119,17 @@ export default function App() {
             </div>
           </div>
           <div className="header-actions">
-            <button disabled title="Coming later">
-              ⟳ &nbsp; Sync with Things
-            </button>
+            <SyncWithThings
+              onSync={() => void h.syncThings()}
+              running={e.syncState.running}
+              recovery={!!e.syncState.uncertain}
+              available={
+                date === today() &&
+                !e.loading &&
+                !e.loadError &&
+                e.plan.status === "editable"
+              }
+            />
             <div className="day-menu">
               <button
                 aria-label="More day actions"
@@ -131,7 +141,12 @@ export default function App() {
               {actions && (
                 <div className="menu-popup">
                   <button
-                    disabled={e.pending || e.loading || !!e.loadError}
+                    disabled={
+                      e.pending ||
+                      e.syncState.running ||
+                      e.loading ||
+                      !!e.loadError
+                    }
                     onClick={() => {
                       setActions(false);
                       void h.transition(
@@ -174,6 +189,39 @@ export default function App() {
                   : "Saved"}
           </span>
         </div>
+        {(e.syncState.error ||
+          e.syncState.result ||
+          e.things?.lastSuccessfulSync) && (
+          <section className="sync-feedback" aria-label="Things sync result">
+            <div role={e.syncState.error ? "alert" : "status"}>
+              {e.syncState.error ||
+                ((e.syncState.result ?? e.things?.lastSuccessfulSync) &&
+                  (() => {
+                    const r = (e.syncState.result ??
+                      e.things!.lastSuccessfulSync)!;
+                    return `${r.addedCount} added · ${r.updatedCount} updated · ${r.unresolvedCount} unresolved${r.addedCount === 0 && r.updatedCount === 0 ? " · No task changes" : ""}. Last successful sync: ${new Date(r.completedAt).toLocaleString()}`;
+                  })())}
+            </div>
+            {(
+              e.syncState.result ?? e.things?.lastSuccessfulSync
+            )?.unresolved.map((item) => (
+              <p key={item.sourceId}>
+                {item.title ?? "Linked task"}: {item.reason}
+              </p>
+            ))}
+            {e.syncState.error && (
+              <small>
+                Activate Sync with Things to{" "}
+                {e.syncState.uncertain
+                  ? "check the previous result without rereading Things"
+                  : "try again"}
+                . Last successful sync:{" "}
+                {(e.syncState.result ?? e.things?.lastSuccessfulSync)
+                  ?.completedAt ?? "Never"}
+              </small>
+            )}
+          </section>
+        )}
         {e.saveError && (
           <div className="error-banner" role="alert">
             {e.saveError}{" "}
@@ -251,6 +299,7 @@ export default function App() {
                   tasks={e.plan.tasks}
                   change={h.edit}
                   disabled={blocked}
+                  linkedIds={e.things?.taskLinks.map((l) => l.task_id)}
                   result={r}
                 />
                 <div className="lower-left">

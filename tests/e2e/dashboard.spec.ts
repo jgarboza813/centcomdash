@@ -148,7 +148,7 @@ test("reference layout and color consistency at desktop and mobile", async ({
   ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Sync with Things" }),
-  ).toBeDisabled();
+  ).toBeEnabled();
   mkdirSync("artifacts/dashboard", { recursive: true });
   await page.screenshot({
     path: "artifacts/dashboard/desktop.png",

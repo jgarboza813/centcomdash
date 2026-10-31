@@ -198,7 +198,7 @@ it("enforces local access and body limits without leaking files", async () => {
 });
 it("refuses unknown schema versions without changing saved data", async () => {
   await put(mutation(0));
-  db.pragma("user_version = 2");
+  db.pragma("user_version = 3");
   expect(() => openDatabase(join(dir, "test.sqlite"))).toThrow(
     "Unsupported database version",
   );

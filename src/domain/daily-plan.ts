@@ -28,7 +28,21 @@ export interface DayResult {
   completedCount: number;
   scorePercent: number | null;
 }
+export interface ThingsMetadata {
+  taskLinks: { task_id: string; source_id: string }[];
+  lastSuccessfulSync: SyncResult | null;
+}
+export interface SyncResult {
+  requestId: string;
+  targetDate: string;
+  completedAt: string;
+  addedCount: number;
+  updatedCount: number;
+  unresolvedCount: number;
+  unresolved: { sourceId: string; title?: string; reason: string }[];
+}
 export interface Envelope {
+  things?: ThingsMetadata;
   plan: Plan;
   result: DayResult;
 }

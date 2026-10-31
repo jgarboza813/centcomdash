@@ -45,7 +45,7 @@ file for backup. To restore, stop the server, keep a copy of the existing file, 
 it with your backup and restart. No backup is uploaded or sent anywhere. Schema startup refuses
 unknown versions or failed migrations instead of deleting history.
 
-This is a single-user local application. Authentication, public hosting, Things sync, category
+This is a single-user local application. Authentication, public hosting, category
 breakdown, streaks, timeline, notes and insights are not implemented; their labeled areas retain
 the approved composition. Do not expose the server to a public network.
 
@@ -64,3 +64,22 @@ open the user database. Stop other instances before E2E tests (ports 5173/3001 m
 Screenshots are in ignored `artifacts/dashboard/`; failure traces are in `test-results/`.
 Specifications, acceptance scenarios, plan, tasks and recorded validation are under
 `specs/001-daily-planning-scoring/`.
+
+## Sync with Things
+
+See [local service setup](tools/things-api/README.md). Start the pinned read-only Python service,
+then explicitly activate **Sync with Things** on today's editable dashboard. No source reads
+occur on startup, reload, focus, timers, ordinary edits or date navigation.
+
+Imports select Today to-dos with the ❗/❗️ tag and exactly one weight tag. Existing decorated
+tags are supported: 🔴 XL, 🟠 L, 🟢 M, 🔵 S, with plain XL/L/M/S aliases. Missing/conflicting
+weights are skipped and reported. Title text alone does not select a task. Assigned daily
+weights are preserved on later syncs. Things controls linked completion on sync, overriding
+local checkbox changes; missing/canceled/trashed source tasks remain unresolved rather than
+being removed or inferred complete. Source renames refresh linked titles on editable days.
+
+Finalized days remain protected. A failed/uncertain operation never retries automatically;
+activate the same button explicitly to retry or recover its saved receipt. Recovery can work
+after midnight/finalization without reading Things or modifying plans. See the sync result
+for added/updated/unresolved counts and last successful time. Credentials and local backup
+files stay in ignored data/, never the browser or repository.

@@ -5,7 +5,18 @@ import { resolve } from "node:path";
 import type { DB } from "./db/database";
 import { readDay, mutate, monthDays, AppError } from "./daily-plan-service";
 import { dateInput } from "../domain/validation";
-export function createApp(db: DB) {
+import { createSyncService } from "./things/sync-service";
+import { httpThingsReader } from "./things/http-things-reader";
+import type { ThingsReader } from "./things/things-reader";
+export function createApp(
+  db: DB,
+  options: { reader?: ThingsReader; clock?: () => Date } = {},
+) {
+  const syncService = createSyncService(
+    db,
+    options.reader ?? httpThingsReader(),
+    options.clock,
+  );
   const app = express();
   app.disable("x-powered-by");
   app.use((req, res, next) => {
@@ -15,20 +26,16 @@ export function createApp(db: DB) {
       !/^127\.0\.0\.1:\d+$/.test(host) ||
       (origin && !/^http:\/\/127\.0\.0\.1:(3001|5173|4173)$/.test(origin))
     ) {
-      res
-        .status(403)
-        .json({
-          error: { code: "LOCAL_ACCESS_ONLY", message: "Local access only." },
-        });
+      res.status(403).json({
+        error: { code: "LOCAL_ACCESS_ONLY", message: "Local access only." },
+      });
       return;
     }
     if (req.path.startsWith("/api")) res.setHeader("Cache-Control", "no-store");
     if (["PUT", "POST"].includes(req.method) && !req.is("application/json")) {
-      res
-        .status(400)
-        .json({
-          error: { code: "VALIDATION_ERROR", message: "JSON input required." },
-        });
+      res.status(400).json({
+        error: { code: "VALIDATION_ERROR", message: "JSON input required." },
+      });
       return;
     }
     next();
@@ -49,6 +56,14 @@ export function createApp(db: DB) {
       throw new AppError("VALIDATION_ERROR", 400, "Invalid month.");
     res.json(monthDays(db, req.params.month));
   });
+  app.post("/api/days/:date/things-sync", async (req, res) =>
+    res.json(
+      await syncService.sync(dateInput.parse(req.params.date), req.body),
+    ),
+  );
+  app.post("/api/days/:date/things-sync/recover", (req, res) =>
+    res.json(syncService.recover(dateInput.parse(req.params.date), req.body)),
+  );
   app.use("/api", (_req, res) =>
     res
       .status(404)
@@ -57,14 +72,12 @@ export function createApp(db: DB) {
   app.use(express.static(resolve("dist")));
   const errors: ErrorRequestHandler = (err, _req, res, _next) => {
     if (err instanceof ZodError) {
-      res
-        .status(400)
-        .json({
-          error: {
-            code: "VALIDATION_ERROR",
-            message: err.issues[0]?.message ?? "Invalid input",
-          },
-        });
+      res.status(400).json({
+        error: {
+          code: "VALIDATION_ERROR",
+          message: err.issues[0]?.message ?? "Invalid input",
+        },
+      });
       return;
     }
     const status =
@@ -75,28 +88,26 @@ export function createApp(db: DB) {
           : err.type === "entity.parse.failed"
             ? 400
             : 500;
-    res
-      .status(status)
-      .json({
-        error: {
-          code:
-            err instanceof AppError
-              ? err.code
-              : status === 413
-                ? "PAYLOAD_TOO_LARGE"
-                : status === 400
-                  ? "VALIDATION_ERROR"
-                  : "STORAGE_ERROR",
-          message:
-            err instanceof AppError
-              ? err.message
-              : status === 413
-                ? "This plan is too large to save."
-                : status === 400
-                  ? "Invalid JSON."
-                  : "Could not load or save. Retry your changes.",
-        },
-      });
+    res.status(status).json({
+      error: {
+        code:
+          err instanceof AppError
+            ? err.code
+            : status === 413
+              ? "PAYLOAD_TOO_LARGE"
+              : status === 400
+                ? "VALIDATION_ERROR"
+                : "STORAGE_ERROR",
+        message:
+          err instanceof AppError
+            ? err.message
+            : status === 413
+              ? "This plan is too large to save."
+              : status === 400
+                ? "Invalid JSON."
+                : "Could not load or save. Retry your changes.",
+      },
+    });
   };
   app.use(errors);
   return app;

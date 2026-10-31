@@ -2,12 +2,14 @@ import { useRef, useState } from "react";
 import { weights, type Task, type Weight } from "../../domain/daily-plan";
 import type { DayResult } from "../../domain/daily-plan";
 export function PlanTable({
+  linkedIds = [],
   tasks,
   change,
   disabled,
   result,
   title,
 }: {
+  linkedIds?: string[];
   tasks: Task[];
   change: (tasks: Task[]) => void;
   disabled: boolean;
@@ -78,7 +80,19 @@ export function PlanTable({
                 </button>
               </>
             ) : (
-              t.title
+              <span>
+                {t.title}
+                {linkedIds.includes(t.id) && (
+                  <span
+                    className="things-link"
+                    title="Things controls completion on sync"
+                    aria-label="Things controls completion on sync"
+                  >
+                    {" "}
+                    ↗ Things
+                  </span>
+                )}
+              </span>
             )}
           </div>
           <div>

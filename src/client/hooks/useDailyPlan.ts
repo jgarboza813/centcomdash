@@ -5,9 +5,19 @@ import {
   type Envelope,
   type Plan,
   type Task,
+  type ThingsMetadata,
+  type SyncResult,
 } from "../../domain/daily-plan";
 import { today } from "../../domain/dates";
+interface SyncState {
+  running: boolean;
+  error: string;
+  uncertain?: { requestId: string; expectedRevision: number };
+  result?: SyncResult;
+}
 interface Entry {
+  things?: ThingsMetadata;
+  syncState: SyncState;
   started?: boolean;
   plan: Plan;
   ack: Plan;
@@ -30,6 +40,7 @@ export function useDailyPlan() {
     let e = entries.current.get(d);
     if (!e) {
       e = {
+        syncState: { running: false, error: "" },
         plan: emptyPlan(d),
         ack: emptyPlan(d),
         loading: true,
@@ -51,6 +62,7 @@ export function useDailyPlan() {
     notify();
     try {
       const env = await api<Envelope>("/days/" + d);
+      e.things = env.things ?? e.things;
       e.plan = env.plan;
       e.ack = env.plan;
       e.dirty = false;
@@ -101,6 +113,7 @@ export function useDailyPlan() {
           }
           const req = x.request;
           const env = await api<Envelope>(req.path, req.body, req.method);
+          x.things = env.things ?? x.things;
           x.ack = env.plan;
           if (x.version === req.version) {
             x.plan = env.plan;
@@ -131,7 +144,13 @@ export function useDailyPlan() {
     return x.flight;
   }
   function edit(tasks: Task[]) {
-    if (e.loading || e.loadError || e.plan.status === "finalized") return;
+    if (
+      e.loading ||
+      e.loadError ||
+      e.plan.status === "finalized" ||
+      e.syncState.running
+    )
+      return;
     e.plan = { ...e.plan, tasks };
     e.version++;
     e.dirty = true;
@@ -143,7 +162,7 @@ export function useDailyPlan() {
     notify();
   }
   async function transition(action: "finalize" | "reopen") {
-    if (e.pending) return;
+    if (e.pending || e.syncState.running) return;
     try {
       if (!e.request?.path.match(/finalize|reopen/)) await flush(date);
       e.pending = true;
@@ -171,6 +190,54 @@ export function useDailyPlan() {
       notify();
     }
   }
+  async function syncThings() {
+    const d = date,
+      x = entry(d);
+    if (x.syncState.running) return;
+    const recovery = x.syncState.uncertain;
+    if (
+      !recovery &&
+      (d !== today() ||
+        x.loading ||
+        x.loadError ||
+        x.plan.status === "finalized")
+    )
+      return;
+    x.syncState.running = true;
+    x.syncState.error = "";
+    notify();
+    try {
+      let body = recovery;
+      if (!body) {
+        clearTimeout(x.timer);
+        await flush(d);
+        body = {
+          requestId: crypto.randomUUID(),
+          expectedRevision: x.ack.revision,
+        };
+      }
+      x.syncState.uncertain = body;
+      const response = await api<{ day: Envelope; sync: SyncResult }>(
+        `/days/${d}/things-sync${recovery ? "/recover" : ""}`,
+        body,
+      );
+      if (response.day.plan.revision >= x.ack.revision && !x.dirty) {
+        x.ack = response.day.plan;
+        x.plan = response.day.plan;
+        x.things = response.day.things ?? x.things;
+      }
+      x.syncState.result = response.sync;
+      x.syncState.uncertain = undefined;
+      saved();
+    } catch (err) {
+      x.syncState.error = (err as Error).message;
+      if (err instanceof ApiError && err.code !== "SYNC_IN_PROGRESS")
+        x.syncState.uncertain = undefined;
+    } finally {
+      x.syncState.running = false;
+      notify();
+    }
+  }
   function retry() {
     if (e.request?.path.endsWith("/finalize")) {
       void transition("finalize");
@@ -192,6 +259,7 @@ export function useDailyPlan() {
     return () => window.removeEventListener("beforeunload", warn);
   }, []);
   return {
+    syncThings,
     date,
     setDate,
     entry: e,

@@ -23,7 +23,20 @@ export function readDay(db: DB, date: string): Envelope {
   const plan: Plan = row ? JSON.parse(row.record) : emptyPlan(date);
   if (plan.schemaVersion !== 1 || plan.scoreRule !== "fixed-budget-v1")
     throw new Error("Unsupported saved record");
-  return { plan, result: result(plan.tasks) };
+  const taskLinks = db
+    .prepare("SELECT task_id,source_id FROM things_links WHERE date=?")
+    .all(date) as { task_id: string; source_id: string }[];
+  const state = db
+    .prepare("SELECT record FROM things_sync_state WHERE date=?")
+    .get(date) as { record: string } | undefined;
+  return {
+    plan,
+    result: result(plan.tasks),
+    things: {
+      taskLinks,
+      lastSuccessfulSync: state ? JSON.parse(state.record) : null,
+    },
+  };
 }
 export function monthDays(db: DB, month: string) {
   return {
@@ -110,13 +123,22 @@ export function mutate(
       plan.status = "editable";
       plan.finalizedAt = null;
     }
-    const response = { plan, result: result(plan.tasks) };
     db.prepare(
       "INSERT INTO days(date,record) VALUES (?,?) ON CONFLICT(date) DO UPDATE SET record=excluded.record",
     ).run(date, JSON.stringify(plan));
+    for (const link of db
+      .prepare("SELECT task_id FROM things_links WHERE date=?")
+      .all(date) as { task_id: string }[]) {
+      if (!plan.tasks.some((t) => t.id === link.task_id))
+        db.prepare("DELETE FROM things_links WHERE date=? AND task_id=?").run(
+          date,
+          link.task_id,
+        );
+    }
+    const enriched = readDay(db, date);
     db.prepare(
       "INSERT INTO receipts(id,fingerprint,response) VALUES (?,?,?)",
-    ).run(body.requestId, fingerprint, JSON.stringify(response));
-    return response;
+    ).run(body.requestId, fingerprint, JSON.stringify(enriched));
+    return enriched;
   })();
 }

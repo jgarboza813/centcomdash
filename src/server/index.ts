@@ -6,7 +6,10 @@ const db = openDatabase(
 const server = createApp(db).listen(
   Number(process.env.PORT ?? 3001),
   "127.0.0.1",
-  () => console.log("Central Command: http://127.0.0.1:3001"),
+  () =>
+    console.log(
+      `Central Command: http://127.0.0.1:${process.env.PORT ?? 3001}`,
+    ),
 );
 for (const signal of ["SIGINT", "SIGTERM"] as const)
   process.on(signal, () =>

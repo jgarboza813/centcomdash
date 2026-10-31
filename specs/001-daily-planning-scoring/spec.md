@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-31
 
-**Status**: Ready for implementation-readiness recheck
+**Status**: Implemented — validation recorded in validation.md
 
 **Input**: User-approved scope: add tasks to a day, assign XL/L/M/S weights, show planned
 allocation and remaining capacity, mark tasks complete, calculate the daily score, and save

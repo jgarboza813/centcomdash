@@ -1,0 +1,12 @@
+node_modules/
+dist/
+build/
+data/
+*.sqlite*
+*.log
+.env*
+coverage/
+playwright-report/
+test-results/
+artifacts/
+.DS_Store

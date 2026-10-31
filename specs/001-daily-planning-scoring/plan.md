@@ -180,3 +180,13 @@ future cells show No data, while live daily summaries still show the current cal
 Calendar acceptance scenarios are in spec.md. Task order places shared classification before
 consumers and final visual/accessibility review after calendar integration. All implementation
 and verification task boxes remain unchecked.
+
+## Implemented organization
+
+The reference composition and core behaviors are implemented. Compact sidebar/header/summary/
+future-panel/lifecycle/status elements share src/client/App.tsx; add/edit form logic shares
+PlanTable.tsx. The API service boundary re-exports the transactional store rather than adding
+redundant business logic. Tests are consolidated into scoring.test.ts, planning-api.test.ts,
+and dashboard.spec.ts. See validation.md for evidence. This keeps the single-package design
+and accepted scope while avoiding single-use wrapper files. The active runtime is Node 24;
+system Node remains unchanged.

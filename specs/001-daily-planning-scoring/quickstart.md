@@ -1,17 +1,16 @@
 # Quickstart Validation Guide
 
-This is the validation procedure for the future implementation. No application or npm scripts
-exist yet; the commands below are the implementation's required script contract.
+This is the validation procedure for the implemented local dashboard. See README.md for runtime
+setup and validation.md for recorded results.
 
 ## Prerequisites and setup
 
 1. Activate Node 24 LTS with your existing version manager; confirm `node --version` reports
    v24.x. The detected v16.19.0 must be replaced for this project before dependency installation.
-2. Once implementation supplies package.json and the lockfile, run:
+2. With Node 24 active and package.json/package-lock.json present, run:
 
 ```sh
 npm ci
-npx playwright install chromium
 npm run dev
 ```
 
@@ -119,3 +118,5 @@ reopen and verify No data without a score even in tooltips/accessible names; ref
 verify return of score/color. Past finalized 96% is bright green; unfinalized positive, future,
 zero and missing/empty cells stay neutral No data. Daily Completed/Progress remain live.
 Perform final rendered/accessibility review only after the calendar is integrated.
+
+Browser tests use installed Google Chrome (`channel: chrome`), not a downloaded Chromium.

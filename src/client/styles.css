@@ -137,7 +137,7 @@ p {
   font-size: 14px;
   color: #bdc5d0;
 }
-.sidebar nav button span {
+.sidebar nav button > span:first-child {
   font-size: 22px;
   width: 22px;
   text-align: center;
@@ -146,7 +146,7 @@ p {
   background: #102033;
   color: #fff;
 }
-.sidebar nav button.active span {
+.sidebar nav button.active > span:first-child {
   color: #ffb738;
 }
 .sidebar-bottom {
@@ -173,7 +173,7 @@ p {
   font-size: 14px;
   color: #d0d6df;
 }
-.identity > span {
+.identity > span:first-child {
   background: #233449;
   border-radius: 50%;
   padding: 9px;
@@ -270,6 +270,7 @@ header p {
 }
 .metric {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 6px;
@@ -749,6 +750,7 @@ footer {
     padding: 22px;
   }
   .summary {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 10px;
   }
   .metric {
@@ -1005,6 +1007,111 @@ footer {
     font-size: 11px;
   }
   .sync-feedback {
+    font-size: 11px;
+  }
+}
+
+/* Tablet navigation rail: retain destinations and identity while giving the
+   four summary cards and plan more horizontal room. */
+@media (min-width: 761px) and (max-width: 1150px) {
+  .sidebar {
+    width: 76px;
+    padding: 24px 12px;
+  }
+  .sidebar .sidebar-label {
+    display: none;
+  }
+  .brand,
+  .identity {
+    justify-content: center;
+    gap: 0;
+  }
+  .brand-mark {
+    font-size: 32px;
+  }
+  .sidebar nav {
+    gap: 8px;
+    margin-top: 30px;
+  }
+  .sidebar nav button {
+    justify-content: center;
+    gap: 0;
+    padding: 12px;
+    min-height: 48px;
+  }
+  .streak-future {
+    justify-content: center;
+    padding: 10px 0;
+  }
+  .identity {
+    margin-top: 16px;
+  }
+  main {
+    margin-left: 76px;
+    width: calc(100% - 76px);
+  }
+}
+
+/* Compact summaries: one shared label row, inline score and visual, one detail line. */
+.summary .metric {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 40px;
+  grid-template-rows: 16px 40px 19px;
+  align-content: center;
+  align-items: center;
+  gap: 4px 8px;
+  min-height: 118px;
+  padding: 14px;
+}
+.summary .metric > div:first-child {
+  display: contents;
+}
+.summary .metric h2 {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  margin: 0;
+}
+.summary .metric strong {
+  grid-column: 1;
+  grid-row: 2;
+  font-size: clamp(24px, 2.4vw, 33px);
+  white-space: nowrap;
+}
+.summary .metric p {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  margin: 0;
+  font-size: 12px;
+}
+.summary .metric .ring,
+.summary .metric .task-icon {
+  grid-column: 2;
+  grid-row: 2;
+  width: 40px;
+  height: 40px;
+}
+.summary .metric .task-icon {
+  display: block;
+  font-size: 32px;
+  text-align: center;
+  line-height: 40px;
+}
+.summary .metric-streak .streak-icon {
+  grid-column: 2;
+  font-size: 32px;
+  text-align: center;
+}
+.summary .metric-streak p {
+  grid-column: 1;
+  grid-row: 2;
+  color: var(--muted);
+}
+@media (max-width: 500px) {
+  .summary .metric {
+    padding: 12px;
+    gap: 4px 6px;
+  }
+  .summary .metric p {
     font-size: 11px;
   }
 }

@@ -55,8 +55,16 @@ export default function App() {
   return (
     <div className="app-shell">
       <aside className={menu ? "sidebar open" : "sidebar"}>
-        <a className="brand" href="#today">
-          <span className="brand-mark">⬡</span>Central Command
+        <a
+          className="brand"
+          href="#today"
+          aria-label="Central Command"
+          title="Central Command"
+        >
+          <span className="brand-mark" aria-hidden="true">
+            ⬡
+          </span>
+          <span className="sidebar-label">Central Command</span>
         </a>
         <nav aria-label="Main navigation">
           {[
@@ -69,12 +77,13 @@ export default function App() {
           ].map(([icon, label]) => (
             <button
               key={label}
+              aria-label={label}
               className={label === "Today" ? "active" : ""}
               disabled={["Analytics", "Categories", "Settings"].includes(label)}
               title={
                 ["Analytics", "Categories", "Settings"].includes(label)
-                  ? "Coming later"
-                  : undefined
+                  ? `${label} — Coming later`
+                  : label
               }
               onClick={() => {
                 setMenu(false);
@@ -86,19 +95,24 @@ export default function App() {
               }}
             >
               <span aria-hidden="true">{icon}</span>
-              {label}
+              <span className="sidebar-label">{label}</span>
             </button>
           ))}
         </nav>
         <div className="sidebar-bottom">
-          <div className="streak-future">
-            <span>♨</span>
-            <div>
+          <div
+            className="streak-future"
+            title="Day Streak — Coming later"
+            aria-label="Day Streak — Coming later"
+          >
+            <span aria-hidden="true">♨</span>
+            <div className="sidebar-label">
               Day Streak<small>Coming later</small>
             </div>
           </div>
-          <div className="identity">
-            <span>JM</span>Jose Marin
+          <div className="identity" title="Jose Marin">
+            <span>JM</span>
+            <span className="sidebar-label">Jose Marin</span>
           </div>
         </div>
       </aside>
@@ -248,9 +262,7 @@ export default function App() {
                 <div>
                   <h2>Planned</h2>
                   <strong className="allocation">{r.plannedPoints}%</strong>
-                  <p>
-                    {r.plannedPoints} / 100 points<small>capacity used</small>
-                  </p>
+                  <p>{r.plannedPoints} / 100 pts</p>
                 </div>
                 <ProgressRing score={r.plannedPoints} planned />
               </section>
@@ -260,10 +272,7 @@ export default function App() {
                   <strong className={"score-" + scoreBand(score)}>
                     {score === null ? "No plan" : score + "%"}
                   </strong>
-                  <p>
-                    {r.completedPoints} / 100 points
-                    <small>daily budget completed</small>
-                  </p>
+                  <p>{r.completedPoints} / 100 pts</p>
                 </div>
                 <ProgressRing score={score} />
               </section>
@@ -272,23 +281,21 @@ export default function App() {
                   <h2>Tasks</h2>
                   <strong className="purple">{r.totalCount}</strong>
                   <p>
-                    {r.completedCount} completed
-                    <small>{r.totalCount - r.completedCount} remaining</small>
+                    {r.completedCount} done · {r.totalCount - r.completedCount}{" "}
+                    left
                   </p>
                 </div>
                 <span className="task-icon" aria-hidden="true">
                   ▤
                 </span>
               </section>
-              <section className="metric panel">
+              <section className="metric panel metric-streak">
                 <div>
                   <h2>Streak</h2>
                   <strong className="streak-icon" aria-hidden="true">
                     ♨
                   </strong>
-                  <p>
-                    Coming later<small>Build your consistency</small>
-                  </p>
+                  <p>Coming later</p>
                 </div>
               </section>
             </div>

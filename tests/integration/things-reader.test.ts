@@ -1,6 +1,9 @@
 import { it, expect } from "vitest";
 import { httpThingsReader } from "../../src/server/things/http-things-reader";
-const headers = { "X-Centcom-Timezone": "America/New_York" };
+const headers = {
+  "X-Centcom-Timezone": "America/New_York",
+  "X-Centcom-Categories": "1",
+};
 const raw = {
   uuid: "a",
   type: "to-do",
@@ -8,6 +11,7 @@ const raw = {
   status: "incomplete",
   tags: ["❗️", "🔴 XL"],
   notes: "must not escape",
+  project_category: null,
 };
 it("uses GET bearer requests, normalizes verified omissions and drops extra data", async () => {
   const calls: { url: string; options: any }[] = [];
@@ -182,4 +186,34 @@ it("includes Today and This Evening candidates in one list read", async () => {
     ["evening", true],
   ]);
   expect(paths).toEqual(["/health", "/today"]);
+});
+it("requires explicit category capability and active project context", async () => {
+  for (const [category, capability, succeeds] of [
+    [{ sourceId: "p", name: "Travel" }, "1", true],
+    [null, "1", true],
+    [undefined, "1", false],
+    [{ sourceId: "p" }, "1", false],
+    [{ sourceId: "p", name: " " }, "1", false],
+    [null, "0", false],
+  ] as const) {
+    const fetcher = (async (url: any) =>
+      new Response(
+        JSON.stringify(
+          String(url).endsWith("/health")
+            ? { read: true, write: false }
+            : [{ ...raw, project_category: category }],
+        ),
+        { headers: { ...headers, "X-Centcom-Categories": capability } },
+      )) as typeof fetch;
+    const promise = httpThingsReader({
+      token: "fixture",
+      fetcher,
+    }).readSnapshot([]);
+    if (succeeds)
+      expect((await promise).candidates[0].category).toEqual(category);
+    else
+      await expect(promise).rejects.toMatchObject({
+        code: "THINGS_INCOMPATIBLE",
+      });
+  }
 });

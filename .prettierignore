@@ -1,0 +1,10 @@
+node_modules/
+dist/
+build/
+coverage/
+artifacts/
+playwright-report/
+test-results/
+data/
+.venv/
+package-lock.json

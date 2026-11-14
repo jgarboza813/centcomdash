@@ -31,6 +31,14 @@ try {
     JSON.stringify({
       liveReadOnly: true,
       imported: first.sync.addedCount,
+      categorized: first.day.plan.tasks.filter((t: any) => t.category).length,
+      uncategorized: first.day.plan.tasks.filter((t: any) => !t.category)
+        .length,
+      distinctProjects: new Set(
+        first.day.plan.tasks.flatMap((t: any) =>
+          t.category ? [t.category.sourceId] : [],
+        ),
+      ).size,
       unresolved: first.sync.unresolvedCount,
       repeatedSyncs: 10,
       duplicateEntries: 0,

@@ -26,6 +26,7 @@ app.state.reader = DashboardThingsReader(str(settings.things_db_path) if setting
 @app.middleware("http")
 async def timezone_header(request, call_next):
     response = await call_next(request)
+    response.headers['X-Centcom-Categories'] = '1'
     response.headers['X-Centcom-Timezone'] = 'America/New_York'
     return response
 uvicorn.run(app, host='127.0.0.1', port=5225, access_log=False)

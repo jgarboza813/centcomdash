@@ -13,6 +13,7 @@ const item = (id: string, tags = ["❗️", "🔴 XL"]) =>
     status: "open",
     inToday: true,
     inTrash: false,
+    category: null,
   });
 it("matches marker and decorated weights exactly", () => {
   expect(weightFor(["🔴 XL"])).toBe("XL");
@@ -125,4 +126,95 @@ it("imports tasks completed before their first sync as completed", () => {
   expect(merged.tasks.every((t) => t.completed && t.weightPoints === 1)).toBe(
     true,
   );
+});
+it("snapshots project identity and counts category-only refreshes once", () => {
+  const p = emptyPlan("2026-10-31");
+  const original = {
+    ...item("a"),
+    category: { sourceId: "project-a", name: "Travel" },
+  };
+  const first = mergeThings(p, [], [original], []);
+  expect(first.tasks[0].category).toEqual(original.category);
+  p.tasks = first.tasks;
+  const renamed = {
+    ...original,
+    category: { sourceId: "project-a", name: "Renamed" },
+  };
+  const next = mergeThings(p, first.links, [], [renamed]);
+  expect(next.updatedCount).toBe(1);
+  expect(next.tasks[0]).toMatchObject({
+    id: first.tasks[0].id,
+    weightPoints: 20,
+    category: renamed.category,
+  });
+  p.tasks = next.tasks;
+  expect(mergeThings(p, first.links, [], [renamed]).updatedCount).toBe(0);
+  const cleared = mergeThings(
+    p,
+    first.links,
+    [],
+    [{ ...original, category: null }],
+  );
+  expect(cleared.tasks[0].category).toBeNull();
+  expect(cleared.updatedCount).toBe(1);
+  for (const unresolved of [
+    { ...original, status: "canceled" as const, category: undefined },
+    { ...original, inTrash: true, category: undefined },
+    { sourceId: "a", missing: true as const },
+  ]) {
+    expect(
+      mergeThings(p, first.links, [], [unresolved]).tasks[0].category,
+    ).toEqual(renamed.category);
+  }
+});
+it("rejects absent active category but accepts canceled or trashed without one", () => {
+  const raw = { ...item("a"), category: undefined };
+  expect(sourceTask.safeParse(raw).success).toBe(false);
+  expect(sourceTask.safeParse({ ...raw, status: "canceled" }).success).toBe(
+    true,
+  );
+  expect(sourceTask.safeParse({ ...raw, inTrash: true }).success).toBe(true);
+});
+it("counts combined category/title/completion changes once and normalizes legacy null once", () => {
+  const p = emptyPlan("2026-10-31");
+  const original = {
+    ...item("a"),
+    category: { sourceId: "p", name: "Travel" },
+  };
+  const first = mergeThings(p, [], [original], []);
+  p.tasks = first.tasks;
+  const changed = mergeThings(
+    p,
+    first.links,
+    [],
+    [
+      {
+        ...original,
+        title: "New title",
+        status: "completed",
+        category: { sourceId: "q", name: "Travel" },
+      },
+    ],
+  );
+  expect(changed.updatedCount).toBe(1);
+  expect(changed.tasks[0]).toMatchObject({
+    id: first.tasks[0].id,
+    title: "New title",
+    completed: true,
+    weightPoints: 20,
+    category: { sourceId: "q", name: "Travel" },
+  });
+  delete p.tasks[0].category;
+  const normalized = mergeThings(
+    p,
+    first.links,
+    [],
+    [{ ...original, category: null }],
+  );
+  expect(normalized.updatedCount).toBe(1);
+  p.tasks = normalized.tasks;
+  expect(
+    mergeThings(p, first.links, [], [{ ...original, category: null }])
+      .updatedCount,
+  ).toBe(0);
 });

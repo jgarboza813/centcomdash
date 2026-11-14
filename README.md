@@ -83,3 +83,13 @@ activate the same button explicitly to retry or recover its saved receipt. Recov
 after midnight/finalization without reading Things or modifying plans. See the sync result
 for added/updated/unresolved counts and last successful time. Credentials and local backup
 files stay in ignored data/, never the browser or repository.
+
+### Task project categories
+
+Things project names appear in blue beneath each task title; the old Things label is removed.
+Sync resolves containing projects for tasks under headings and saves category snapshots with
+each day. Tasks with no project, manual tasks and pre-feature saved tasks display Uncategorized.
+Refresh categories with Sync with Things; ordinary edits retain them, and past/finalized plans
+keep their saved project names. Scoring, weights and source completion authority are unchanged.
+Restart the repository Things launcher when upgrading: category-capable responses advertise
+X-Centcom-Categories: 1. Category charts, filtering and management remain follow-up work.

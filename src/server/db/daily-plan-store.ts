@@ -108,6 +108,9 @@ export function mutate(
         const old = current.tasks.find((o) => o.id === t.id);
         return {
           ...t,
+          ...(old && Object.hasOwn(old, "category")
+            ? { category: old.category }
+            : {}),
           weightPoints:
             old?.weightLabel === t.weightLabel
               ? old.weightPoints

@@ -2,15 +2,30 @@ import { readFileSync } from "node:fs";
 import { z } from "zod";
 import type { ThingsReader } from "./things-reader";
 import { AppError } from "../db/daily-plan-store";
+import { categorySchema } from "../../domain/things-sync";
 import type { SourceTask, Tracked } from "../../domain/things-sync";
-const wireTask = z.object({
-  uuid: z.string().min(1),
-  type: z.literal("to-do"),
-  title: z.string().trim().min(1),
-  status: z.enum(["incomplete", "completed", "canceled"]),
-  tags: z.array(z.string()).optional(),
-  trashed: z.boolean().optional(),
-});
+const wireTask = z
+  .object({
+    uuid: z.string().min(1),
+    type: z.literal("to-do"),
+    title: z.string().trim().min(1),
+    status: z.enum(["incomplete", "completed", "canceled"]),
+    tags: z.array(z.string()).optional(),
+    trashed: z.boolean().optional(),
+    project_category: categorySchema.nullable().optional(),
+  })
+  .superRefine((task, ctx) => {
+    if (
+      !task.trashed &&
+      task.status !== "canceled" &&
+      task.project_category === undefined
+    )
+      ctx.addIssue({
+        code: "custom",
+        path: ["project_category"],
+        message: "Category support is required.",
+      });
+  });
 export function httpThingsReader(
   options: {
     base?: string;
@@ -94,6 +109,12 @@ export function httpThingsReader(
               409,
               "Start Things API with the verified Central Command launcher.",
             );
+          if (res.headers.get("x-centcom-categories") !== "1")
+            throw new AppError(
+              "THINGS_INCOMPATIBLE",
+              502,
+              "Restart the Things service with the updated Central Command launcher for project categories.",
+            );
           const chunks: Uint8Array[] = [];
           const stream = res.body?.getReader();
           if (!stream) throw new Error();
@@ -152,6 +173,7 @@ export function httpThingsReader(
           status: t.status === "incomplete" ? "open" : t.status,
           inToday,
           inTrash: t.trashed ?? false,
+          category: t.project_category,
         };
       }
       // The pinned /today reader includes both Today and This Evening.

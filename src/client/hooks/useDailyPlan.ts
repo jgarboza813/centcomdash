@@ -113,6 +113,11 @@ export function useDailyPlan() {
           }
           const req = x.request;
           const env = await api<Envelope>(req.path, req.body, req.method);
+          if (env.plan.revision < x.ack.revision)
+            throw new ApiError(
+              "REVISION_CONFLICT",
+              "An older save result was received. Reload to review the current day.",
+            );
           x.things = env.things ?? x.things;
           x.ack = env.plan;
           if (x.version === req.version) {

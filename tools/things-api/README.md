@@ -58,3 +58,18 @@ stop_date=<today in America/New_York>). Deduplicate by source ID and preserve To
 Tasks completed on prior dates are excluded from new imports. Linked completion lookup remains
 independent of list membership. This is a local reader extension; no source writes or automatic
 sync triggers are introduced. verify_reader.py covers completed-today and completed-yesterday.
+
+## Project category support
+
+Restart serve.py after updating the repository. The launcher adds X-Centcom-Categories: 1;
+the Node reader rejects older launchers with an actionable restart message rather than
+clearing saved categories. Every readable active/completed to-do carries explicit
+project_category object/null. Canceled/trashed tasks bypass project resolution and retain
+the last dashboard category as unresolved.
+
+The Python policy uses the pinned library's mode=ro connection for a narrow parameterized
+projection of task/parent UUID, type, title and relationship references. Heading children
+resolve to the containing project; areas and headings are not substituted as categories.
+Dangling/inconsistent parents fail readable-task sync. No source writes or project-tree crawl
+is introduced. Cache and connection lifetimes are limited to one response. Repeat the
+synthetic compatibility check after Things/schema/library upgrades.

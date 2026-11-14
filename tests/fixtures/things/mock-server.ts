@@ -3,8 +3,12 @@ const app = express();
 app.use(express.json());
 let reads = 0,
   completed = false,
-  failure = false;
+  failure = false,
+  projectName = "Work",
+  projectId = "project-work",
+  uncategorized = false;
 app.use((_q, r, n) => {
+  r.setHeader("X-Centcom-Categories", "1");
   r.setHeader("X-Centcom-Timezone", "America/New_York");
   n();
 });
@@ -13,6 +17,9 @@ app.post("/control", (q, r) => {
   reads = 0;
   completed = !!q.body.completed;
   failure = !!q.body.failure;
+  projectName = q.body.projectName ?? "Work";
+  projectId = q.body.projectId ?? "project-work";
+  uncategorized = !!q.body.uncategorized;
   r.json({ ok: true });
 });
 app.get("/health", (_q, r) => {
@@ -21,6 +28,9 @@ app.get("/health", (_q, r) => {
 });
 const tasks = () => [
   {
+    project_category: uncategorized
+      ? null
+      : { sourceId: projectId, name: projectName },
     uuid: "test-xl",
     start_bucket: 0,
     type: "to-do",
@@ -29,6 +39,7 @@ const tasks = () => [
     tags: ["❗️", "🔴 XL"],
   },
   {
+    project_category: null,
     uuid: "test-s",
     start_bucket: 1, // This Evening; included in the same upstream /today list.
     type: "to-do",

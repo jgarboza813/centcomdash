@@ -276,7 +276,11 @@ test("calendar legend boundaries and finalized-only eligibility", async ({
   page,
 }) => {
   const values = [0, 44, 45, 64, 65, 84, 85, 94, 95, 120];
-  const month = date.slice(0, 7);
+  // Use a complete past month so this check is valid even on the first day.
+  const past = new Date(date + "T12:00:00Z");
+  past.setUTCDate(1);
+  past.setUTCMonth(past.getUTCMonth() - 1);
+  const month = past.toISOString().slice(0, 7);
   for (const [i, value] of values.entries()) {
     const d = month + "-" + String(i + 1).padStart(2, "0");
     const tasks = Array.from({ length: value }, (_, n) => ({
@@ -295,6 +299,7 @@ test("calendar legend boundaries and finalized-only eligibility", async ({
   }
   await seed(page, date);
   await page.goto("/");
+  await page.getByRole("button", { name: "Previous month" }).click();
   for (const [i, value] of values.entries()) {
     const d = month + "-" + String(i + 1).padStart(2, "0");
     const cell = page.getByRole("button", {

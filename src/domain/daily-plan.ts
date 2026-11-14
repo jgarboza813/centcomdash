@@ -1,6 +1,11 @@
 export const weights = { XL: 20, L: 10, M: 5, S: 1 } as const;
 export type Weight = keyof typeof weights;
+export interface CategorySnapshot {
+  sourceId: string;
+  name: string;
+}
 export interface Task {
+  category?: CategorySnapshot | null;
   id: string;
   title: string;
   weightLabel: Weight;

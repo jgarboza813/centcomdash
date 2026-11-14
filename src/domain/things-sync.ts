@@ -1,13 +1,33 @@
 import { z } from "zod";
 import { weights, type Plan, type Task, type Weight } from "./daily-plan";
-export const sourceTask = z.object({
-  sourceId: z.string().min(1),
-  title: z.string().trim().min(1),
-  tags: z.array(z.string()),
-  status: z.enum(["open", "completed", "canceled"]),
-  inToday: z.boolean(),
-  inTrash: z.boolean(),
-});
+export const categorySchema = z
+  .object({
+    sourceId: z.string().refine((s) => s.trim().length > 0),
+    name: z.string().refine((s) => s.trim().length > 0),
+  })
+  .strict();
+export const sourceTask = z
+  .object({
+    sourceId: z.string().min(1),
+    title: z.string().trim().min(1),
+    tags: z.array(z.string()),
+    status: z.enum(["open", "completed", "canceled"]),
+    inToday: z.boolean(),
+    inTrash: z.boolean(),
+    category: categorySchema.nullable().optional(),
+  })
+  .superRefine((task, ctx) => {
+    if (
+      !task.inTrash &&
+      task.status !== "canceled" &&
+      task.category === undefined
+    )
+      ctx.addIssue({
+        code: "custom",
+        path: ["category"],
+        message: "Project category is required for readable tasks.",
+      });
+  });
 export type SourceTask = z.infer<typeof sourceTask>;
 export interface Link {
   task_id: string;
@@ -68,10 +88,17 @@ export function mergeThings(
       continue;
     }
     const complete = source.status === "completed";
-    if (local.title !== source.title || local.completed !== complete)
+    if (
+      local.title !== source.title ||
+      local.completed !== complete ||
+      local.category === undefined ||
+      local.category?.sourceId !== source.category?.sourceId ||
+      local.category?.name !== source.category?.name
+    )
       updatedCount++;
     local.title = source.title;
     local.completed = complete;
+    local.category = source.category;
     if (!source.inToday && !complete) issue(source, "rescheduled");
   }
   for (const t of candidates) {
@@ -101,6 +128,7 @@ export function mergeThings(
       weightLabel: weight,
       weightPoints: weights[weight],
       completed: t.status === "completed",
+      category: t.category,
     };
     tasks.push(task);
     nextLinks.push({ task_id: task.id, source_id: t.sourceId });

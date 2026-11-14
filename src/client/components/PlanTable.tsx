@@ -52,46 +52,44 @@ export function PlanTable({
       {tasks.map((t) => (
         <div className="task-row" key={t.id}>
           <div className="task-title">
-            {editing && !disabled ? (
-              <>
-                <input
-                  aria-label={`Title for ${t.title}`}
-                  defaultValue={t.title}
-                  key={t.id + t.title}
-                  onBlur={(ev) => {
-                    if (!ev.target.value.trim()) {
-                      setError("A task title cannot be empty.");
-                      ev.target.value = t.title;
-                    } else {
-                      patch(t.id, { title: ev.target.value.trim() });
-                      setError("");
-                    }
-                  }}
-                />
-                <button
-                  className="remove"
-                  aria-label={`Remove ${t.title}`}
-                  onClick={() => {
-                    change(tasks.filter((x) => x.id !== t.id));
-                    addButton.current?.focus();
-                  }}
-                >
-                  ×
-                </button>
-              </>
-            ) : (
-              <span>
-                {t.title}
-                {linkedIds.includes(t.id) && (
-                  <span
-                    className="things-link"
-                    title="Things controls completion on sync"
-                    aria-label="Things controls completion on sync"
+            <div className="task-title-main">
+              {editing && !disabled ? (
+                <>
+                  <input
+                    aria-label={`Title for ${t.title}`}
+                    defaultValue={t.title}
+                    key={t.id + t.title}
+                    onBlur={(ev) => {
+                      if (!ev.target.value.trim()) {
+                        setError("A task title cannot be empty.");
+                        ev.target.value = t.title;
+                      } else {
+                        patch(t.id, { title: ev.target.value.trim() });
+                        setError("");
+                      }
+                    }}
+                  />
+                  <button
+                    className="remove"
+                    aria-label={`Remove ${t.title}`}
+                    onClick={() => {
+                      change(tasks.filter((x) => x.id !== t.id));
+                      addButton.current?.focus();
+                    }}
                   >
-                    {" "}
-                    ↗ Things
-                  </span>
-                )}
+                    ×
+                  </button>
+                </>
+              ) : (
+                <span>{t.title}</span>
+              )}
+            </div>
+            <span className="task-category">
+              {t.category?.name ?? "Uncategorized"}
+            </span>
+            {linkedIds.includes(t.id) && (
+              <span className="visually-hidden" id={`things-authority-${t.id}`}>
+                Things controls completion on sync
               </span>
             )}
           </div>
@@ -121,6 +119,9 @@ export function PlanTable({
             className="status-check"
             type="checkbox"
             aria-label={`Complete ${t.title}`}
+            aria-describedby={
+              linkedIds.includes(t.id) ? `things-authority-${t.id}` : undefined
+            }
             checked={t.completed}
             disabled={disabled}
             onChange={() => patch(t.id, { completed: !t.completed })}

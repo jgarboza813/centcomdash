@@ -72,3 +72,9 @@ The embedded score calendar is functional planned scope, not a Coming later plac
 its colors follow the confirmed shared mapping; lifecycle eligibility is now confirmed in the specification.
 These follow-ups are not bundled into the current implementation and do not authorize advanced
 analytics or AI work outside the constitution's MVP boundaries.
+
+## Weight palette update — 2026-11-14
+
+Use the user's Things 3 weight colors throughout task badges and the Weight Guide:
+XL red, L orange, M green, S blue. This overrides weight colors in the reference images.
+Weight labels/points and the separate day score-color rules are unchanged.

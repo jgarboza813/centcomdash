@@ -56,6 +56,13 @@ contradictory sample text or numbers in the image.
 - Ring geometry may fill one revolution at 100%; all numeric values remain uncapped. Above
   100 show the actual value and an overflow text indicator, never a misleading capped score.
 
+## Weight label colors
+
+Weight badges in task rows and the Weight Guide match Things 3 labels: XL red, L orange,
+M green, S blue (confirmed 2026-11-14). Use tinted dark backgrounds and matching borders/text;
+keep XL/L/M/S text visible so meaning does not rely on color. Points remain XL=20, L=10,
+M=5, S=1. This weight palette is independent of the daily score-color mapping.
+
 ## Today's Plan and editing workflow
 
 - Panel heading and Edit Plan action lead into a table with Task, Weight, Points, Status

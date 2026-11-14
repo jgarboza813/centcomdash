@@ -1157,3 +1157,56 @@ footer {
 .lifecycle-action svg {
   flex-shrink: 0;
 }
+
+.plan-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.sort-explanation {
+  color: var(--muted);
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+.task-head .sort-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  width: 100%;
+  min-height: 32px;
+  padding: 2px 0;
+  color: inherit;
+  font: inherit;
+  text-transform: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: 3px;
+}
+.task-head .sort-header:hover:not(:disabled) {
+  color: #fff;
+  background: #15202e;
+}
+.task-head [aria-sort] .sort-header {
+  color: #82b6ea;
+}
+.sort-indicator {
+  display: block;
+  flex-shrink: 0;
+}
+.task-status-cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.task-head .sort-header-icon {
+  justify-content: center;
+  gap: 2px;
+}
+.column-icon {
+  display: block;
+  flex-shrink: 0;
+}

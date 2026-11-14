@@ -93,3 +93,15 @@ Refresh categories with Sync with Things; ordinary edits retain them, and past/f
 keep their saved project names. Scoring, weights and source completion authority are unchanged.
 Restart the repository Things launcher when upgrading: category-capable responses advertise
 X-Centcom-Categories: 1. Category charts, filtering and management remain follow-up work.
+
+### Sort Today's Plan
+
+Select Task for A–Z, Weight for XL→S or Status for incomplete-first; select the same header
+again to reverse its direction. Reset sort restores the original task order. Tied values
+retain their original order in either direction. Sorting is available on finalized/history
+views and changes only the display; it does not save or contact Things.
+
+Sort selection follows date navigation in the open page and resets on reload. Edit Plan
+pauses sorting and holds rows in place until Done. Date navigation/finalization ends that
+local edit session while preserving cached per-day drafts. Keyboard Enter/Space operates
+the header buttons; indicators and accessible sort state identify the active column.

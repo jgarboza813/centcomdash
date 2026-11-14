@@ -7,6 +7,7 @@ import { today, dateLabel, greeting } from "../domain/dates";
 import { weights } from "../domain/daily-plan";
 import { ProgressRing } from "./components/ProgressRing";
 import { PlanTable } from "./components/PlanTable";
+import type { SortSelection } from "./task-sorting";
 import { MonthlyScoreCalendar } from "./components/MonthlyScoreCalendar";
 function Future({
   title,
@@ -41,6 +42,7 @@ export default function App() {
   const h = useDailyPlan(),
     { entry: e, date } = h;
   const [menu, setMenu] = useState(false);
+  const [sort, setSort] = useState<SortSelection>(null);
   const r = result(e.plan.tasks),
     score = r.scorePercent;
   const historic = date !== today(),
@@ -301,6 +303,9 @@ export default function App() {
             <div className="content-grid">
               <div className="left-column">
                 <PlanTable
+                  key={`${date}:${e.plan.status}`}
+                  sort={sort}
+                  setSort={setSort}
                   title={prefix + " Plan"}
                   tasks={e.plan.tasks}
                   change={h.edit}

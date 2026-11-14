@@ -81,7 +81,7 @@ export function createSyncService(
           throw new AppError(
             "THINGS_READ_FAILED",
             502,
-            "Things could not be read. Click Sync with Things to retry.",
+            "Things could not be read. Click Things Sync to retry.",
           );
         }
         const parsed = z

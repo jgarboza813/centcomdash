@@ -61,7 +61,6 @@ test("planning, fixed score, finalized calendar, reopen and reload", async ({
   await expect(
     page.getByRole("button", { name: new RegExp(date + ": No data") }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "More day actions" }).click();
   await page.getByRole("button", { name: "Finalize Day", exact: true }).click();
   await expect(page.getByText("● Finalized")).toBeVisible();
   await expect(
@@ -72,7 +71,6 @@ test("planning, fixed score, finalized calendar, reopen and reload", async ({
   await expect(
     page.getByRole("checkbox", { name: "Complete My commitment" }),
   ).toBeDisabled();
-  await page.getByRole("button", { name: "More day actions" }).click();
   await page.getByRole("button", { name: "Reopen Day", exact: true }).click();
   await expect(page.getByText("○ Editable")).toBeVisible();
   await expect(
@@ -147,7 +145,7 @@ test("reference layout and color consistency at desktop and mobile", async ({
     page.getByRole("heading", { name: "Insights", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Sync with Things" }),
+    page.getByRole("button", { name: "Things Sync" }),
   ).toBeEnabled();
   mkdirSync("artifacts/dashboard", { recursive: true });
   await page.screenshot({
@@ -354,9 +352,7 @@ test("keyboard-only task entry, navigation and lifecycle controls", async ({
   await expect(
     page.getByRole("status").filter({ hasText: "Saved" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "More day actions" }).focus();
-  await page.keyboard.press("Enter");
-  await page.keyboard.press("Tab");
+  await page.getByRole("button", { name: "Finalize Day", exact: true }).focus();
   await page.keyboard.press("Enter");
   await expect(page.getByText("● Finalized")).toBeVisible();
 });
@@ -388,7 +384,6 @@ test("failed finalization stays editable and exact retry succeeds", async ({
     if (fail) await route.abort();
     else await route.continue();
   });
-  await page.getByRole("button", { name: "More day actions" }).click();
   await page.getByRole("button", { name: "Finalize Day", exact: true }).click();
   await expect(page.getByText("○ Editable")).toBeVisible();
   await expect(page.getByRole("button", { name: "Retry save" })).toBeVisible();

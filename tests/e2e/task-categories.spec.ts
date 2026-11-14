@@ -28,7 +28,7 @@ test("project categories appear below titles and remain readable when edited and
 }) => {
   await reset(page);
   await page.goto("/");
-  await page.getByRole("button", { name: "Sync with Things" }).click();
+  await page.getByRole("button", { name: "Things Sync" }).click();
   const xl = page.locator(".task-row").filter({
     has: page.getByRole("checkbox", {
       name: "Complete Imported Things XL",
@@ -61,7 +61,7 @@ test("project categories appear below titles and remain readable when edited and
   ).toHaveText("Work");
   const name = "Travel 🌍 <script> & " + "LongProjectName".repeat(6);
   await page.request.post(source + "/control", { data: { projectName: name } });
-  await page.getByRole("button", { name: "Sync with Things" }).click();
+  await page.getByRole("button", { name: "Things Sync" }).click();
   await expect(
     page.locator(".task-category").filter({ hasText: name }),
   ).toHaveCount(1);
@@ -94,7 +94,7 @@ test("category refresh is explicit and failures preserve the last saved category
 }) => {
   await reset(page);
   await page.goto("/");
-  await page.getByRole("button", { name: "Sync with Things" }).click();
+  await page.getByRole("button", { name: "Things Sync" }).click();
   await expect(page.locator(".task-category").first()).toHaveText("Work");
   await page.request.post(source + "/control", {
     data: { projectId: "new-project", projectName: "Travel" },
@@ -104,16 +104,16 @@ test("category refresh is explicit and failures preserve the last saved category
   expect(
     (await (await page.request.get(source + "/metrics")).json()).reads,
   ).toBe(0);
-  await page.getByRole("button", { name: "Sync with Things" }).click();
+  await page.getByRole("button", { name: "Things Sync" }).click();
   await expect(page.locator(".task-category").first()).toHaveText("Travel");
   await page.request.post(source + "/control", { data: { failure: true } });
-  await page.getByRole("button", { name: "Sync with Things" }).click();
+  await page.getByRole("button", { name: "Things Sync" }).click();
   await expect(page.getByRole("alert")).toContainText("unavailable");
   await expect(page.locator(".task-category").first()).toHaveText("Travel");
   await page.request.post(source + "/control", {
     data: { uncategorized: true },
   });
-  await page.getByRole("button", { name: "Sync with Things" }).click();
+  await page.getByRole("button", { name: "Things Sync" }).click();
   await expect(
     page.locator(".task-category").filter({ hasText: "Uncategorized" }),
   ).toHaveCount(2);
@@ -140,11 +140,10 @@ test("finalized snapshots and legacy tasks retain their saved context without so
   await page.request.post(source + "/control", { data: { completed: true } });
   await page.goto("/");
   await expect(page.locator(".task-category")).toHaveText("Uncategorized");
-  await page.getByRole("button", { name: "Sync with Things" }).click();
+  await page.getByRole("button", { name: "Things Sync" }).click();
   await expect(
     page.locator(".task-category").filter({ hasText: "Work" }),
   ).toHaveCount(1);
-  await page.getByRole("button", { name: "More day actions" }).click();
   await page.getByRole("button", { name: "Finalize Day", exact: true }).click();
   await expect(page.getByText("● Finalized")).toBeVisible();
   await page.request.post(source + "/control", {
@@ -166,7 +165,7 @@ test("recovering an older receipt cannot replace newer category context", async 
 }) => {
   await reset(page);
   await page.goto("/");
-  await page.getByRole("button", { name: "Sync with Things" }).click();
+  await page.getByRole("button", { name: "Things Sync" }).click();
   await expect(page.locator(".task-category").first()).toHaveText("Work");
   await page.request.post(source + "/control", {
     data: { projectName: "Older category" },
@@ -175,9 +174,9 @@ test("recovering an older receipt cannot replace newer category context", async 
     await route.fetch();
     await route.abort();
   });
-  await page.getByRole("button", { name: "Sync with Things" }).click();
+  await page.getByRole("button", { name: "Things Sync" }).click();
   await expect(
-    page.getByRole("button", { name: "Sync with Things — recover result" }),
+    page.getByRole("button", { name: "Things Sync — recover result" }),
   ).toBeVisible();
   const afterLost = await (await page.request.get("/api/days/" + date)).json();
   await page.request.post(source + "/control", {
@@ -204,10 +203,10 @@ test("recovering an older receipt cannot replace newer category context", async 
   const count = (await (await page.request.get(source + "/metrics")).json())
     .reads;
   await page
-    .getByRole("button", { name: "Sync with Things — recover result" })
+    .getByRole("button", { name: "Things Sync — recover result" })
     .click();
   await expect(
-    page.getByRole("button", { name: "Sync with Things — recover result" }),
+    page.getByRole("button", { name: "Things Sync — recover result" }),
   ).toHaveCount(0);
   await expect(page.locator(".task-category").first()).toHaveText(
     "Newer category",

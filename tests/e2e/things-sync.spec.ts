@@ -29,18 +29,18 @@ test("only button clicks import Today and This Evening; tags/weights and Things 
   await reset(page);
   await page.goto("/");
   await expect(
-    page.getByRole("button", { name: "Sync with Things" }),
+    page.getByRole("button", { name: "Things Sync" }),
   ).toBeEnabled();
   await page.reload();
   await page.getByLabel("View day").fill("2026-10-01");
   await page.getByLabel("View day").fill(date);
   await expect(
-    page.getByRole("button", { name: "Sync with Things" }),
+    page.getByRole("button", { name: "Things Sync" }),
   ).toBeEnabled();
   expect(
     (await (await page.request.get(source + "/metrics")).json()).reads,
   ).toBe(0);
-  await page.getByRole("button", { name: "Sync with Things" }).click();
+  await page.getByRole("button", { name: "Things Sync" }).click();
   await expect(
     page.getByRole("region", { name: "Things sync result" }),
   ).toContainText("2 added");
@@ -49,7 +49,7 @@ test("only button clicks import Today and This Evening; tags/weights and Things 
   ).toBeVisible();
   await expect(page.locator(".metric").first()).toContainText("21%");
   await page.request.post(source + "/control", { data: { completed: true } });
-  await page.getByRole("button", { name: "Sync with Things" }).click();
+  await page.getByRole("button", { name: "Things Sync" }).click();
   await expect(page.locator(".metric").nth(1)).toContainText("20%");
   await expect(
     page.getByRole("checkbox", { name: "Complete Imported Things XL" }),
@@ -58,7 +58,7 @@ test("only button clicks import Today and This Evening; tags/weights and Things 
     .getByRole("checkbox", { name: "Complete Imported Things XL" })
     .uncheck();
   await expect(page.locator(".save-state")).toHaveText("Saved");
-  await page.getByRole("button", { name: "Sync with Things" }).click();
+  await page.getByRole("button", { name: "Things Sync" }).click();
   await expect(
     page.getByRole("checkbox", { name: "Complete Imported Things XL" }),
   ).toBeChecked();
@@ -69,12 +69,12 @@ test("source failures do not retry automatically or erase data", async ({
 }) => {
   await reset(page);
   await page.goto("/");
-  await page.getByRole("button", { name: "Sync with Things" }).click();
+  await page.getByRole("button", { name: "Things Sync" }).click();
   await expect(
     page.getByRole("region", { name: "Things sync result" }),
   ).toContainText("2 added");
   await page.request.post(source + "/control", { data: { failure: true } });
-  await page.getByRole("button", { name: "Sync with Things" }).click();
+  await page.getByRole("button", { name: "Things Sync" }).click();
   await expect(page.getByRole("alert")).toContainText("unavailable");
   const count = (await (await page.request.get(source + "/metrics")).json())
     .reads;
@@ -98,14 +98,14 @@ test("lost response recovers through same button without another Things read", a
       await route.abort();
     } else await route.continue();
   });
-  await page.getByRole("button", { name: "Sync with Things" }).click();
+  await page.getByRole("button", { name: "Things Sync" }).click();
   await expect(
-    page.getByRole("button", { name: "Sync with Things — recover result" }),
+    page.getByRole("button", { name: "Things Sync — recover result" }),
   ).toBeVisible();
   const count = (await (await page.request.get(source + "/metrics")).json())
     .reads;
   await page
-    .getByRole("button", { name: "Sync with Things — recover result" })
+    .getByRole("button", { name: "Things Sync — recover result" })
     .click();
   await expect(
     page.getByRole("region", { name: "Things sync result" }),
@@ -121,7 +121,7 @@ test("keyboard and mobile have visible explicit sync action", async ({
   await reset(page);
   await page.setViewportSize({ width: 375, height: 900 });
   await page.goto("/");
-  const button = page.getByRole("button", { name: "Sync with Things" });
+  const button = page.getByRole("button", { name: "Things Sync" });
   await expect(button).toBeVisible();
   await button.focus();
   await page.keyboard.press("Enter");
@@ -157,9 +157,9 @@ test("failed autosave blocks source reads", async ({ page }) => {
     .fill("Unsaved commitment");
   await page.getByLabel("Weight", { exact: true }).selectOption("S");
   await page.getByRole("button", { name: "Add", exact: true }).click();
-  await page.getByRole("button", { name: "Sync with Things" }).click();
+  await page.getByRole("button", { name: "Things Sync" }).click();
   await expect(
-    page.getByRole("button", { name: "Sync with Things" }),
+    page.getByRole("button", { name: "Things Sync" }),
   ).toBeEnabled();
   await expect(
     page.getByRole("checkbox", { name: "Complete Unsaved commitment" }),
@@ -186,11 +186,11 @@ test("navigation during sync keeps response on the captured date", async ({
     await gate;
     await route.continue();
   });
-  await page.getByRole("button", { name: "Sync with Things" }).click();
+  await page.getByRole("button", { name: "Things Sync" }).click();
   await begin;
   await page.getByLabel("View day").fill("2026-10-01");
   await expect(
-    page.getByRole("button", { name: "Sync with Things" }),
+    page.getByRole("button", { name: "Things Sync" }),
   ).toBeDisabled();
   release();
   await expect

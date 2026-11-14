@@ -1,4 +1,4 @@
-# Sync with Things UI Contract
+# Things Sync UI Contract
 
 ## Trigger and availability
 
@@ -47,7 +47,7 @@ and announce outcome without opening a blocking modal. Keep existing lifecycle a
 
 ## Explicit recovery exception
 
-An outstanding uncertain operation keeps the same Sync with Things button enabled for receipt
+An outstanding uncertain operation keeps the same Things Sync button enabled for receipt
 recovery on its original date, even after midnight or finalization. Its accessible description
 explains that it checks the previous result without reading Things. The next click calls only
 things-sync/recover with the original ID/revision; it never drains drafts into a new source sync.
@@ -63,3 +63,12 @@ things-api /today endpoint returns both; no separate evening endpoint or bucket 
 Both sections use the same ❗ marker, weight rules, identity and completion reconciliation. The
 synthetic pinned-library check in tools/things-api/verify_reader.py verifies both source buckets;
 reader and browser fixtures cover evening import through the normal explicit button action.
+
+## Button presentation update — 2026-11-14
+
+The idle action reads “Things Sync” with an 18px SVG download-to-tray icon conveying import from Things, aligned centrally with a
+6px gap. Do not use a font-dependent Unicode glyph. The icon is decorative and hidden from
+assistive technology; busy and receipt-recovery labels continue to communicate their states.
+The button stays visible and retains this icon size on smaller screens.
+
+Header actions use compact 6px vertical / 10px horizontal padding and a 32px minimum height.

@@ -39,7 +39,6 @@ export function PlanTable({
       <div className="task-head">
         <span>Task</span>
         <span>Weight</span>
-        <span>Points</span>
         <span>Status</span>
       </div>
       {tasks.length === 0 && (
@@ -114,7 +113,6 @@ export function PlanTable({
               <span className={"badge " + t.weightLabel}>{t.weightLabel}</span>
             )}
           </div>
-          <span className="points">{t.weightPoints}</span>
           <input
             className="status-check"
             type="checkbox"

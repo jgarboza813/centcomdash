@@ -40,8 +40,7 @@ function Future({
 export default function App() {
   const h = useDailyPlan(),
     { entry: e, date } = h;
-  const [menu, setMenu] = useState(false),
-    [actions, setActions] = useState(false);
+  const [menu, setMenu] = useState(false);
   const r = result(e.plan.tasks),
     score = r.scorePercent;
   const historic = date !== today(),
@@ -144,37 +143,37 @@ export default function App() {
                 e.plan.status === "editable"
               }
             />
-            <div className="day-menu">
-              <button
-                aria-label="More day actions"
-                aria-expanded={actions}
-                onClick={() => setActions(!actions)}
-              >
-                ⋮
-              </button>
-              {actions && (
-                <div className="menu-popup">
-                  <button
-                    disabled={
-                      e.pending ||
-                      e.syncState.running ||
-                      e.loading ||
-                      !!e.loadError
-                    }
-                    onClick={() => {
-                      setActions(false);
-                      void h.transition(
-                        e.plan.status === "finalized" ? "reopen" : "finalize",
-                      );
-                    }}
-                  >
-                    {e.plan.status === "finalized"
-                      ? "Reopen Day"
-                      : "Finalize Day"}
-                  </button>
-                </div>
+            <button
+              className={`lifecycle-action ${e.plan.status === "finalized" ? "reopen-day" : "finalize-day"}`}
+              disabled={
+                e.pending || e.syncState.running || e.loading || !!e.loadError
+              }
+              aria-busy={e.pending}
+              onClick={() =>
+                void h.transition(
+                  e.plan.status === "finalized" ? "reopen" : "finalize",
+                )
+              }
+            >
+              {e.plan.status !== "finalized" && (
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" />
+                </svg>
               )}
-            </div>
+              {e.plan.status === "finalized" ? "Reopen Day" : "Finalize Day"}
+            </button>
           </div>
         </header>
         <div className="day-toolbar">
@@ -225,7 +224,7 @@ export default function App() {
             ))}
             {e.syncState.error && (
               <small>
-                Activate Sync with Things to{" "}
+                Activate Things Sync to{" "}
                 {e.syncState.uncertain
                   ? "check the previous result without rereading Things"
                   : "try again"}

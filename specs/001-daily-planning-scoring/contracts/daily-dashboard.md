@@ -26,8 +26,8 @@ contradictory sample text or numbers in the image.
   instead of implying the selected date is today. Keep Today/date selection available as a
   compact secondary control; selecting a date does not finalize it.
 - Reserve the top-right action position for Sync with Things, disabled with “Coming later”
-  explanatory text. Put lifecycle actions in an accessible More day actions menu beside it.
-  Visible Editable/Finalized and save-status text must remain outside the menu.
+  explanatory text. Show a prominent solid-blue Finalize Day button beside it; show Reopen Day directly when finalized.
+  Visible Editable/Finalized and save-status text remain in the day toolbar.
 - Four equal summary cards span the main header row: Planned, Completed, Tasks, Streak.
   Below, place Today's Plan as the large left panel. Stack Today's Progress, Points by Category,
   Weight Guide, Notes for Today, and Insights down the right column. Under Today's Plan,
@@ -60,19 +60,20 @@ contradictory sample text or numbers in the image.
 
 Weight badges in task rows and the Weight Guide match Things 3 labels: XL red, L orange,
 M green, S blue (confirmed 2026-11-14). Use tinted dark backgrounds and matching borders/text;
-keep XL/L/M/S text visible so meaning does not rely on color. Points remain XL=20, L=10,
+keep XL/L/M/S text visible so meaning does not rely on color. All four weight badges use
+the same fixed 32px width with centered text in task rows and the Weight Guide. Points remain XL=20, L=10,
 M=5, S=1. This weight palette is independent of the daily score-color mapping.
 
 ## Today's Plan and editing workflow
 
-- Panel heading and Edit Plan action lead into a table with Task, Weight, Points, Status
-  columns. View mode is the default; title and weight appear as text/badges, not an always-open
+- Panel heading and Edit Plan action lead into a table with Task, Weight, Status
+  columns. The Task column receives the space formerly used by per-task Points. View mode is the default; title and weight appear as text/badges, not an always-open
   form. Status is an accessible checkbox styled as the image's outlined circle/green check.
   It remains directly toggleable on editable days without entering Edit Plan.
 - Edit Plan reveals inline rename, weight selection, and remove controls; Done returns to
   view mode. It is a presentation mode, not a lock/finalize action. Changes autosave; Done
   does not falsely claim pending changes are saved. Finalized days expose no task edit controls.
-- Rows show actual assigned points and subtle separators. Do not reproduce red exclamation
+- Rows show assigned weight badges and subtle separators; omit redundant per-task point values. Do not reproduce red exclamation
   marks from the mockup: urgency/priority is not defined in this feature and must not be
   inferred from task weight.
 - Footer: total allocation as “96 / 100” with “4% remaining” for the agreed example. Above
@@ -120,7 +121,9 @@ M=5, S=1. This weight palette is independent of the daily score-color mapping.
 
 ## Lifecycle, persistence, and navigation
 
-- More day actions offers Finalize Day on an editable day and Reopen Day on a finalized day.
+- A direct header button offers Finalize Day on an editable day and Reopen Day on a finalized day.
+  Finalize Day uses a solid blue background, white text and a sun icon. Reopen Day uses a secondary outlined style.
+  Both buttons remain visible at mobile/tablet widths; no menu interaction is required.
   Both have accessible names and keyboard operation. Finalize first flushes pending changes;
   lifecycle changes only after persistence succeeds. Disable conflicting actions in flight.
 - Autosave committed form edits after 300ms; toggle/remove may save immediately. Update totals
@@ -144,7 +147,7 @@ M=5, S=1. This weight palette is independent of the daily score-color mapping.
 - All controls have semantic roles, accessible names, visible focus and keyboard operation.
   Use polite announcements for save/progress updates and alerts for failures. Disabled feature
   explanations remain discoverable. Chart/ring values have readable text equivalents.
-- Verify readable contrast, long titles, focus after menu/form actions, no overlapping controls,
+- Verify readable contrast, long titles, focus after lifecycle/form actions, no overlapping controls,
   and status comprehension without color. Target WCAG AA contrast. No decorative graph is
   required to convey the actual score.
 

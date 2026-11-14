@@ -18,3 +18,13 @@
   temporary guessed source names. Browsing/rendering never contacts Things.
 - Categories navigation and Points by Category remain truthful coming-later placeholders. No
   filtering, editing, chart aggregation, category color scheme or hidden navigation action is added.
+
+## Compact task rows — 2026-11-14
+
+Use a Things-inspired two-line rhythm: title followed immediately by the blue category,
+without an extra gap. Standard single-line-title rows should be approximately 44–48px tall
+with 6–7px vertical padding, including wide desktop layouts. Keep full title/category text
+wrapping naturally for longer content and allow edit controls to increase row height.
+Use slightly tighter weight badge padding within task rows. Preserve the existing table
+Task, Weight and Status columns, accessible control names, focus outlines and category color.
+Remove the redundant per-task Points column and allocate its width to the Task column at every breakpoint.

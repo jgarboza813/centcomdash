@@ -68,6 +68,7 @@ export function useDailyPlan() {
       e.dirty = false;
       e.request = undefined;
       e.saveError = "";
+      saved();
     } catch (err) {
       e.loadError = (err as Error).message;
     } finally {
@@ -190,6 +191,13 @@ export function useDailyPlan() {
       saved();
     } catch (err) {
       e.saveError = (err as Error).message;
+      if (
+        err instanceof ApiError &&
+        ["REVISION_CONFLICT", "INVALID_STATE", "REQUEST_ID_REUSED"].includes(
+          err.code,
+        )
+      )
+        e.saveError = "Conflict: " + err.message;
     } finally {
       e.pending = false;
       notify();

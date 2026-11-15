@@ -1,3 +1,5 @@
+import { deriveStreaks } from "../../domain/streaks";
+import { validDate } from "../../domain/dates";
 import { createHash } from "node:crypto";
 import type { DB } from "./database";
 import {
@@ -144,4 +146,38 @@ export function mutate(
     ).run(body.requestId, fingerprint, JSON.stringify(enriched));
     return enriched;
   })();
+}
+
+// Saved history is the authority. This operation neither repairs records nor reads Things.
+export function readStreakSummary(db: DB, asOfDate: string) {
+  const rows = db
+    .prepare("SELECT date,record FROM days WHERE date<=? ORDER BY date")
+    .all(asOfDate) as { date: string; record: string }[];
+  const history = rows.map((row) => {
+    const p: Plan = JSON.parse(row.record);
+    if (
+      !p ||
+      !validDate(row.date) ||
+      p.date !== row.date ||
+      p.schemaVersion !== 1 ||
+      p.scoreRule !== "fixed-budget-v1" ||
+      !["editable", "finalized"].includes(p.status) ||
+      !Array.isArray(p.tasks) ||
+      p.tasks.some(
+        (t) =>
+          !t ||
+          typeof t.completed !== "boolean" ||
+          typeof t.weightPoints !== "number" ||
+          !Number.isFinite(t.weightPoints) ||
+          t.weightPoints < 0,
+      )
+    )
+      throw new Error("Unsupported saved scoring history");
+    return {
+      date: row.date,
+      status: p.status,
+      scorePercent: result(p.tasks).scorePercent,
+    };
+  });
+  return deriveStreaks(history, asOfDate);
 }

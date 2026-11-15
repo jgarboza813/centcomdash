@@ -46,7 +46,7 @@ it with your backup and restart. No backup is uploaded or sent anywhere. Schema 
 unknown versions or failed migrations instead of deleting history.
 
 This is a single-user local application. Authentication, public hosting, category
-breakdown, streaks, timeline, notes and insights are not implemented; their labeled areas retain
+breakdown, timeline, notes and insights are not implemented; their labeled areas retain
 the approved composition. Do not expose the server to a public network.
 
 ## Validation
@@ -60,7 +60,7 @@ npm run build
 ```
 
 Browser tests use installed Google Chrome and separate temporary test databases. They do not
-open the user database. Stop other instances before E2E tests (ports 5173/3001 must be free).
+open the user database. Test-owned ports 5173/5237/5236 must be free; tests never use the personal backend on 3001 or Things on 5225.
 Screenshots are in ignored `artifacts/dashboard/`; failure traces are in `test-results/`.
 Specifications, acceptance scenarios, plan, tasks and recorded validation are under
 `specs/001-daily-planning-scoring/`.
@@ -105,3 +105,25 @@ Sort selection follows date navigation in the open page and resets on reload. Ed
 pauses sorting and holds rows in place until Done. Date navigation/finalization ends that
 local edit session while preserving cached per-day drafts. Keyboard Enter/Space operates
 the header buttons; indicators and accessible sort state identify the active column.
+
+
+### Daily streaks
+
+Finalize a day with a saved completion score of at least 85% to qualify. Current streak counts
+consecutive New York calendar days, including weekends. An unfinished today preserves the run
+through yesterday; a finalized today below 85% resets current immediately. Missing, editable or
+nonqualifying past days break runs. Future days do not count. Best is the longest run across saved
+history and can decrease after deliberate historical corrections. Reopening removes qualification;
+refinalizing uses the corrected saved score. Receipt replay never adds an extra day.
+
+The summary and sidebar share the same global-today counts, even when viewing a historical day.
+The compact sidebar retains the current count; keyboard-operable details explain the rule and best.
+Drafts never extend streaks. Successful saves, loads, finalization, reopening and explicit sync
+acknowledgments refresh the read-only summary. Streak refresh never reads Things or changes plans.
+
+Foreground date checks run every 30 seconds and fetch only when the New York day changes. Returning
+to a visible/focused page refreshes immediately; suspended background timers have no precise timing
+guarantee. Reads have a 15-second deadline. Loading/unavailable are distinct from zero; refresh keeps
+previous values with Updating feedback, then marks them Stale on failure. Details include the as-of
+date and failure; Retry restores fresh data without blocking task controls. See
+[streak validation](specs/005-daily-streaks/validation.md) for fixture evidence and limitations.

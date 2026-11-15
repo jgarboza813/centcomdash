@@ -1,9 +1,16 @@
+import { today } from "../domain/dates";
 import express from "express";
 import type { ErrorRequestHandler } from "express";
 import { ZodError } from "zod";
 import { resolve } from "node:path";
 import type { DB } from "./db/database";
-import { readDay, mutate, monthDays, AppError } from "./daily-plan-service";
+import {
+  readDay,
+  mutate,
+  monthDays,
+  readStreakSummary,
+  AppError,
+} from "./daily-plan-service";
 import { dateInput } from "../domain/validation";
 import { createSyncService } from "./things/sync-service";
 import { httpThingsReader } from "./things/http-things-reader";
@@ -41,6 +48,16 @@ export function createApp(
     next();
   });
   app.use(express.json({ limit: "1mb" }));
+  app.get("/api/streaks", (req, res) => {
+    const asOfDate = today(options.clock ? options.clock() : new Date());
+    if (Object.keys(req.query).length)
+      throw new AppError(
+        "VALIDATION_ERROR",
+        400,
+        "Streaks do not accept query parameters.",
+      );
+    res.json(readStreakSummary(db, asOfDate));
+  });
   app.get("/api/days/:date", (req, res) =>
     res.json(readDay(db, dateInput.parse(req.params.date))),
   );

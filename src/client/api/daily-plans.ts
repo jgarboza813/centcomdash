@@ -10,16 +10,18 @@ export async function api<T>(
   path: string,
   body?: unknown,
   method = "POST",
+  signal?: AbortSignal,
 ): Promise<T> {
   const response = await fetch(
     "/api" + path,
     body
       ? {
+          signal,
           method,
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
         }
-      : undefined,
+      : { signal },
   );
   const data = await response.json();
   if (!response.ok)

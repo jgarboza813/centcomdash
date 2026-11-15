@@ -1,3 +1,5 @@
+import { useStreaks } from "./hooks/useStreaks";
+import { StreakSummary } from "./components/StreakSummary";
 import { SyncWithThings } from "./components/SyncWithThings";
 import { useState } from "react";
 import { useDailyPlan } from "./hooks/useDailyPlan";
@@ -41,6 +43,7 @@ function Future({
 export default function App() {
   const h = useDailyPlan(),
     { entry: e, date } = h;
+  const streaks = useStreaks(h.savedTick);
   const [menu, setMenu] = useState(false);
   const [sort, setSort] = useState<SortSelection>(null);
   const r = result(e.plan.tasks),
@@ -101,16 +104,7 @@ export default function App() {
           ))}
         </nav>
         <div className="sidebar-bottom">
-          <div
-            className="streak-future"
-            title="Day Streak — Coming later"
-            aria-label="Day Streak — Coming later"
-          >
-            <span aria-hidden="true">♨</span>
-            <div className="sidebar-label">
-              Day Streak<small>Coming later</small>
-            </div>
-          </div>
+          <StreakSummary state={streaks} sidebar />
           <div className="identity" title="Jose Marin">
             <span>JM</span>
             <span className="sidebar-label">Jose Marin</span>
@@ -290,15 +284,7 @@ export default function App() {
                   ▤
                 </span>
               </section>
-              <section className="metric panel metric-streak">
-                <div>
-                  <h2>Streak</h2>
-                  <strong className="streak-icon" aria-hidden="true">
-                    ♨
-                  </strong>
-                  <p>Coming later</p>
-                </div>
-              </section>
+              <StreakSummary state={streaks} />
             </div>
             <div className="content-grid">
               <div className="left-column">

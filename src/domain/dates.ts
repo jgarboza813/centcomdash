@@ -33,3 +33,12 @@ export function greeting() {
   );
   return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
 }
+
+// Date keys are calendar coordinates: DST never changes their adjacency.
+export function shiftDate(date: string, days: number) {
+  if (!validDate(date) || !Number.isInteger(days))
+    throw new Error("Invalid calendar date");
+  const d = new Date(date + "T12:00:00Z");
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}

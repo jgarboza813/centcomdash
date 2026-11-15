@@ -152,19 +152,6 @@ p {
 .sidebar-bottom {
   margin-top: auto;
 }
-.streak-future {
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 17px 13px;
-  display: flex;
-  gap: 13px;
-  color: #d4dbe5;
-  font-size: 14px;
-}
-.streak-future > span {
-  color: #ff983d;
-  font-size: 28px;
-}
 .identity {
   display: flex;
   gap: 12px;
@@ -1040,10 +1027,6 @@ footer {
     padding: 12px;
     min-height: 48px;
   }
-  .streak-future {
-    justify-content: center;
-    padding: 10px 0;
-  }
   .identity {
     margin-top: 16px;
   }
@@ -1209,4 +1192,184 @@ footer {
 .column-icon {
   display: block;
   flex-shrink: 0;
+}
+
+/* Saved-history streaks share one state in the card and navigation rail. */
+.summary .metric-streak {
+  position: relative;
+  grid-template-rows: 16px 40px minmax(19px, auto);
+}
+.summary .metric-streak h2 {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.summary .metric-streak .streak-icon {
+  grid-row: 2;
+  font-size: 28px;
+}
+.summary .metric-streak .streak-count {
+  color: #ff983d;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(22px, 2.2vw, 30px);
+}
+.streak-units {
+  font-size: 11px;
+  color: var(--muted);
+  margin-left: 5px;
+  font-weight: 400;
+}
+.summary .metric-streak p.streak-detail {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  font-size: 11px;
+  white-space: normal;
+  line-height: 1.5;
+}
+.streak-feedback {
+  color: #ffbd69;
+  font-size: 10px;
+}
+.streak-retry {
+  border: 0;
+  padding: 0 0 0 5px;
+  color: #83c5ff;
+  font-size: 11px;
+  text-decoration: underline;
+  background: transparent;
+  min-height: 0;
+}
+.streak-help {
+  display: inline-block;
+  position: relative;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  line-height: 1.5;
+}
+.streak-help summary {
+  list-style: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px;
+}
+.streak-help summary::-webkit-details-marker {
+  display: none;
+}
+.streak-help summary:focus-visible {
+  outline: 2px solid #60aaff;
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+.streak-popover {
+  position: absolute;
+  right: 0;
+  top: 22px;
+  width: 220px;
+  max-width: 70vw;
+  background: #14202c;
+  border: 1px solid #425569;
+  padding: 12px;
+  border-radius: 8px;
+  z-index: 20;
+  box-shadow: 0 8px 24px #0008;
+  color: #e5ebf3;
+}
+.summary .metric .streak-popover p,
+.streak-popover p {
+  white-space: normal;
+  font-size: 12px;
+  margin: 0 0 6px;
+}
+.sidebar-streak {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px 10px;
+  padding: 12px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 13px;
+}
+.streak-rail-count {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #ff983d;
+}
+.streak-rail-count > span:first-child {
+  font-size: 23px;
+}
+.streak-rail-count .streak-sidebar-units {
+  font-size: 11px;
+  color: var(--muted);
+}
+.streak-rail-count strong {
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+}
+.sidebar-streak .sidebar-label {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  min-width: 0;
+}
+.sidebar-streak small {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.sidebar-streak .streak-help {
+  grid-column: 2;
+  grid-row: 1;
+  margin-left: auto;
+}
+.sidebar-streak .streak-popover {
+  top: auto;
+  bottom: 24px;
+  left: 0;
+  right: auto;
+}
+@media (min-width: 761px) and (max-width: 1150px) {
+  .sidebar-streak {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 8px 2px;
+    gap: 3px;
+    justify-content: center;
+  }
+  .streak-rail-count .streak-sidebar-units {
+    display: none;
+  }
+  .streak-rail-count {
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+  }
+  .streak-rail-count strong {
+    font-size: 18px;
+  }
+  .sidebar-streak .streak-help {
+    margin-left: 0;
+  }
+  .sidebar-streak .streak-feedback {
+    width: 100%;
+    text-align: center;
+    font-size: 9px;
+  }
+  .sidebar-streak .streak-retry {
+    padding: 0;
+  }
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

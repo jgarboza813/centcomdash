@@ -116,3 +116,19 @@ The domain test verifies new completed candidates import with completed=true and
 All 54 unit/API tests, typecheck and lint passed. Restarted read-only service and explicitly ran
 check-sync.ts against an owned temporary dashboard: 8 imported, 0 unresolved, 10 repeated syncs,
 0 duplicates, receipt recovery passed, actual dashboard unmodified. No Things tasks were written.
+
+## Archived-item regression — 2026-11-15
+
+Reproduced using an owned synthetic database: a completion before manualLogDate (already logged
+today) and open tasks inside completed/canceled archived projects, including heading children,
+were incorrectly returned by DashboardThingsReader.today(). Added a read-only archive-membership
+filter using TMSettings.logInterval/manualLogDate and containing project state. The check first
+failed with the archived IDs present, then passed after the fix. Today, This Evening and unlogged
+completed-today items remain eligible; tracked logged completion remains readable. Immediate,
+daily and manual policies pass. Exact fixture database bytes remain unchanged by the reader.
+
+`tools/things-api/.venv/bin/python tools/things-api/verify_reader.py`: all synthetic checks pass.
+`npm test`: 90 passed (9 files). `npm run typecheck` and `git diff --check`: pass.
+Restarted only the confirmed repository-owned local Python reader; authenticated health returned
+200. No sync was triggered and no dashboard commitments or source records were changed. Existing
+imported commitments are retained for deliberate correction via Edit Plan.

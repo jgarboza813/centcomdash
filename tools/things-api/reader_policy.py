@@ -1,5 +1,5 @@
 """Central Command's explicit Today selection, including today's completed items."""
-from datetime import date
+from datetime import date, datetime
 import things
 import sqlite3
 from things.database import Database
@@ -14,6 +14,71 @@ def today_with_completed(**kwargs):
     )
     unique = {item['uuid']: item for item in items}
     return sorted(unique.values(), key=lambda item: (item['today_index'], item.get('start_date') or ''))
+
+
+def exclude_archived(items, *, filepath=None):
+    """Match Logbook membership without confusing completion with archiving.
+
+    TMSettings.logInterval: 0 immediately, 1 daily, 4 manually. Log Completed
+    Now advances manualLogDate; a task completed before that cutoff is archived
+    even if it was completed today. Apply the same rule to containing projects.
+    """
+    database = Database(filepath=filepath)
+    connection = database.connection
+    connection.row_factory = sqlite3.Row
+    try:
+        settings = connection.execute(
+            'SELECT logInterval,manualLogDate FROM TMSettings LIMIT 1'
+        ).fetchone()
+        interval = settings['logInterval'] if settings else 1
+        cutoff = (settings['manualLogDate'] or 0) if settings else 0
+        current_day = date.today()
+        cache = {}
+
+        def record(identifier):
+            if identifier not in cache:
+                cache[identifier] = connection.execute(
+                    'SELECT uuid,type,status,trashed,stopDate,project,heading FROM TMTask WHERE uuid=?',
+                    (identifier,),
+                ).fetchone()
+            row = cache[identifier]
+            if row is None:
+                raise RuntimeError("Things archive relationship is unavailable.")
+            return row
+
+        def archived(row):
+            if row['trashed']:
+                return True
+            if row['status'] not in (2, 3):
+                return False
+            stopped = row['stopDate'] or 0
+            if interval == 0 or stopped <= cutoff:
+                return True
+            return interval != 4 and datetime.fromtimestamp(stopped).date() != current_day
+
+        selected = []
+        for item in items:
+            if item.get('type') != 'to-do':
+                selected.append(item)
+                continue
+            row = record(item['uuid'])
+            if archived(row):
+                continue
+            parents = []
+            if row['project']:
+                parents.append(record(row['project']))
+            if row['heading']:
+                heading = record(row['heading'])
+                if heading['trashed']:
+                    continue
+                if heading['project']:
+                    parents.append(record(heading['project']))
+            if any(archived(parent) for parent in parents):
+                continue
+            selected.append(item)
+        return selected
+    finally:
+        connection.close()
 
 
 def enrich_categories(items, *, filepath=None):
@@ -74,7 +139,8 @@ def enrich_categories(items, *, filepath=None):
 
 class DashboardThingsReader(ThingsReader):
     def today(self):
-        return enrich_categories(today_with_completed(**self._kwargs()), filepath=self._db_path)
+        items = today_with_completed(**self._kwargs())
+        return enrich_categories(exclude_archived(items, filepath=self._db_path), filepath=self._db_path)
 
     def get(self, uuid):
         item = super().get(uuid)

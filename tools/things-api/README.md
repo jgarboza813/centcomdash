@@ -51,7 +51,8 @@ marker/weight filtering; the synthetic verification checks startBucket 0 and 1 m
 
 ## Completed before first sync
 
-Include eligible marked/weighted tasks completed today even if they were never linked before.
+Include eligible marked/weighted tasks completed today even if they were never linked before,
+provided they have not been logged/archived in Things.
 The upstream /today handler defaults to incomplete tasks. The repository launcher installs
 DashboardThingsReader, combining that selection with things.today(status="completed",
 stop_date=<today in America/New_York>). Deduplicate by source ID and preserve Today ordering.
@@ -73,3 +74,22 @@ resolve to the containing project; areas and headings are not substituted as cat
 Dangling/inconsistent parents fail readable-task sync. No source writes or project-tree crawl
 is introduced. Cache and connection lifetimes are limited to one response. Repeat the
 synthetic compatibility check after Things/schema/library upgrades.
+
+
+## Archived-item exclusion (2026-11-15)
+
+New imports exclude items already logged/archived in Things, including otherwise-open tasks
+inside logged/archived projects, directly or through a heading. The read-only launcher consults
+TMSettings.logInterval and manualLogDate rather than treating every completed task as archived:
+immediate logging excludes completed items; manual logging excludes completions at/before the
+last Log Completed Now; daily logging additionally excludes prior-day completions. Existing
+completed-today selection remains bounded to today. Completed items still in Today remain eligible.
+
+This filter applies to new candidates only. Already-linked tasks keep completion reconciliation
+and saved snapshots; the fix does not delete existing commitments or change finalized history.
+No source writes or automatic sync triggers are introduced. Restart the repository Python launcher
+to load this policy. Synthetic verify_reader.py checks logged-today exclusion, direct/heading
+children of archived/canceled/trashed projects, immediate/daily/manual policies, and retained
+Today/This Evening/completed-today imports and linked completion lookup.
+
+Schema-policy reference: [upstream Things CLI membership predicates](https://github.com/ryanlewis/things-cli/blob/main/internal/db/tasks.go).

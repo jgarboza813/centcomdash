@@ -15,6 +15,8 @@ with tempfile.TemporaryDirectory(prefix='centcom-things-compat-') as directory:
         if alias in aliases:columns[aliases[alias]].add(col)
     columns['TMTask'].update({'startBucket', 'rt1_recurrenceRule', 'deadlineSuppressionDate'})
     for table,cols in columns.items():db.execute('CREATE TABLE '+table+' ('+','.join('"'+c+'"' for c in sorted(cols))+')')
+    db.execute('CREATE TABLE TMSettings(logInterval,manualLogDate)')
+    db.execute('INSERT INTO TMSettings VALUES (4,?)', (time.time()-120,))
     db.execute('CREATE TABLE Meta(key,value)');db.execute('INSERT INTO Meta VALUES (?,?)',('databaseVersion',plistlib.dumps(22).decode()))
     for uuid,status,trashed in [('done',3,0),('canceled',2,0),('trash',0,1),('open',0,0)]:
         db.execute('INSERT INTO TMTask(uuid,title,type,status,trashed,start) VALUES (?,?,?,?,?,?)',(uuid,'Synthetic '+uuid,0,status,trashed,1))
@@ -22,7 +24,7 @@ with tempfile.TemporaryDirectory(prefix='centcom-things-compat-') as directory:
     encoded_day = (day.year << 16) | (day.month << 12) | (day.day << 7)
     for uuid, bucket in [('daytime', 0), ('this-evening', 1)]:
         db.execute('INSERT INTO TMTask(uuid,title,type,status,trashed,start,startDate,startBucket,todayIndex) VALUES (?,?,?,?,?,?,?,?,?)', (uuid, 'Synthetic '+uuid, 0, 0, 0, 1, encoded_day, bucket, bucket))
-    for uuid, offset in [('completed-today', 0), ('completed-yesterday', 86400)]:
+    for uuid, offset in [('completed-today', 0), ('completed-yesterday', 86400), ('logged-today', 240)]:
         db.execute('INSERT INTO TMTask(uuid,title,type,status,trashed,start,startDate,startBucket,todayIndex,stopDate) VALUES (?,?,?,?,?,?,?,?,?,?)', (uuid, 'Synthetic '+uuid, 0, 3, 0, 1, encoded_day, 0, 2, time.time()-offset))
     for uuid, kind, title, project, heading, status, trashed in [
         ('project-a',1,'Travel',None,None,0,0),
@@ -42,6 +44,11 @@ with tempfile.TemporaryDirectory(prefix='centcom-things-compat-') as directory:
         ('trashed-broken',0,'Trashed broken','missing',None,0,1),
     ]:
         db.execute('INSERT INTO TMTask(uuid,type,title,project,heading,status,trashed,start) VALUES (?,?,?,?,?,?,?,?)', (uuid,kind,title,project,heading,status,trashed,1))
+    for identifier, status, trashed in [('archived-project',3,0),('canceled-project',2,0),('trashed-project',0,1)]:
+        db.execute('INSERT INTO TMTask(uuid,type,title,status,trashed,stopDate) VALUES (?,1,?,?,?,?)', (identifier,identifier,status,trashed,time.time()-240))
+        db.execute('INSERT INTO TMTask(uuid,type,title,status,trashed,start,startDate,project,todayIndex) VALUES (?,0,?,0,0,1,?,?,0)', (identifier+'-direct','Archived child',encoded_day,identifier))
+        db.execute('INSERT INTO TMTask(uuid,type,title,status,trashed,project) VALUES (?,2,?,0,0,?)',(identifier+'-heading','Heading',identifier))
+        db.execute('INSERT INTO TMTask(uuid,type,title,status,trashed,start,startDate,heading,todayIndex) VALUES (?,0,?,0,0,1,?,?,0)', (identifier+'-nested','Archived nested child',encoded_day,identifier+'-heading'))
     db.execute('INSERT INTO TMArea(uuid,title) VALUES (?,?)', ('area','Area only'))
     db.execute('UPDATE TMTask SET area=? WHERE uuid=?', ('area','no-project'))
     db.commit();db.close()
@@ -50,6 +57,24 @@ with tempfile.TemporaryDirectory(prefix='centcom-things-compat-') as directory:
     complete_selection = {task['uuid'] for task in today_with_completed(filepath=str(path))}
     assert {'daytime', 'this-evening', 'completed-today'} <= complete_selection, complete_selection
     assert 'completed-yesterday' not in complete_selection, complete_selection
+    from reader_policy import DashboardThingsReader
+    reader = DashboardThingsReader(str(path))
+    saved_bytes = path.read_bytes()
+    dashboard_selection = {task['uuid'] for task in reader.today()}
+    assert path.read_bytes() == saved_bytes, 'Reader changed source storage'
+    assert 'logged-today' not in dashboard_selection, dashboard_selection
+    assert {'completed-today','daytime','this-evening'} <= dashboard_selection
+    assert not any(uuid.endswith(('-direct','-nested')) and uuid.startswith(('archived-project','canceled-project','trashed-project')) for uuid in dashboard_selection)
+    # Existing links can still read completion; archive exclusion is for new imports.
+    assert reader.get('logged-today')['status']=='completed'
+    edit=sqlite3.connect(path)
+    edit.execute('UPDATE TMSettings SET logInterval=0');edit.commit()
+    assert 'completed-today' not in {task['uuid'] for task in reader.today()}
+    edit.execute('UPDATE TMSettings SET logInterval=1');edit.commit()
+    daily = {task['uuid'] for task in reader.today()}
+    assert 'completed-today' in daily and 'logged-today' not in daily
+    edit.execute('UPDATE TMSettings SET logInterval=4');edit.commit();edit.close()
+
     for uuid,expected in [('done','completed'),('canceled','canceled'),('open','incomplete'),('trash','incomplete')]:
         item=things.get(uuid,filepath=str(path));assert item['status']==expected;assert bool(item.get('trashed',False))==(uuid=='trash')
     def category(uuid):
@@ -70,4 +95,4 @@ with tempfile.TemporaryDirectory(prefix='centcom-things-compat-') as directory:
     clock=sqlite3.connect(':memory:')
     for stamp,expected in [('2026-11-01T03:59:00Z','2026-10-31'),('2026-11-01T04:00:00Z','2026-11-01'),('2026-03-08T04:59:00Z','2026-03-07'),('2026-03-08T05:00:00Z','2026-03-08')]:
         assert clock.execute("SELECT date(?,'localtime')",(stamp,)).fetchone()[0]==expected
-print(json.dumps({'synthetic_completed_canceled_trash':'pass','new_york_midnight_dst':'pass','today_and_this_evening':'pass','completed_today_only':'pass','project_categories':'pass','unresolved_precedence':'pass'}))
+print(json.dumps({'synthetic_completed_canceled_trash':'pass','new_york_midnight_dst':'pass','today_and_this_evening':'pass','completed_today_only':'pass','archived_tasks_and_projects_excluded':'pass','project_categories':'pass','unresolved_precedence':'pass'}))
